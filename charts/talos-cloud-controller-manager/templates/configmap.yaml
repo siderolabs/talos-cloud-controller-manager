@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "talos-cloud-controller-manager.fullname" . }}
+  labels:
+    {{- include "talos-cloud-controller-manager.labels" . | nindent 4 }}
+data:
+  ccm-config.yaml: |
+    global:

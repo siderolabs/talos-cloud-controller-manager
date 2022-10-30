@@ -1,0 +1,13 @@
+apiVersion: v2
+appVersion: "1.3.0"
+version: 0.0.1
+kubeVersion: ">= 1.24.0"
+
+type: application
+name: talos-cloud-controller-manager
+description: Talos Cloud Controller Manager Helm Chart
+home: https://github.com/siderolabs/talos-cloud-controller-manager
+
+maintainers:
+  - name: sergelogvinov
+    url: https://github.com/sergelogvinov

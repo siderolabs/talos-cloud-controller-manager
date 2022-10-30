@@ -1,0 +1,7 @@
+/dist/
+/bin/
+#
+/talos-cloud-controller-manager*
+/kubeconfig
+#
+/docs/*.go

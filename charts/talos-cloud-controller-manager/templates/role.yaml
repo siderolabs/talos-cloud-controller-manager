@@ -1,0 +1,73 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: system:{{ include "talos-cloud-controller-manager.fullname" . }}
+  labels:
+    {{- include "talos-cloud-controller-manager.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - create
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - nodes/status
+  verbs:
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - get
+# - apiGroups:
+#   - ""
+#   resources:
+#   - serviceaccounts/token
+#   verbs:
+#   - create
+# - apiGroups:
+#   - certificates.k8s.io
+#   resources:
+#   - certificatesigningrequests
+#   verbs:
+#   - list
+#   - watch
+# - apiGroups:
+#   - certificates.k8s.io
+#   resources:
+#   - certificatesigningrequests/approval
+#   verbs:
+#   - update
+# - apiGroups:
+#   - certificates.k8s.io
+#   resources:
+#   - signers
+#   resourceNames:
+#   - kubernetes.io/kubelet-serving
+#   verbs:
+#   - approve

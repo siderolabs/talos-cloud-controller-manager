@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "talos-cloud-controller-manager.fullname" . }}
+  labels:
+    {{- include "talos-cloud-controller-manager.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "talos-cloud-controller-manager.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "talos-cloud-controller-manager.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "talos-cloud-controller-manager.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["/talos-cloud-controller-manager"]
+          args:
+            - --v={{ .Values.logVerbosityLevel }}
+            - --cloud-provider=talos
+            - --cloud-config=/etc/talos/ccm-config.yaml
+            - --controllers={{- trimAll "," (include "talos-cloud-controller-manager.enabledControllers" . ) }}
+            - --leader-elect-resource-name=cloud-controller-manager-talos
+            - --use-service-account-credentials
+            - --secure-port=10258
+          {{- with .Values.extraArgs }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - containerPort: 10258
+              name: https
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 10258
+              scheme: HTTPS
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: cloud-config
+              mountPath: /etc/talos
+              readOnly: true
+            - name: talos-secrets
+              mountPath: /var/run/secrets/talos.dev
+              readOnly: true
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: cloud-config
+          configMap:
+            name: {{ include "talos-cloud-controller-manager.fullname" . }}
+            defaultMode: 416 # 0640
+        - name: talos-secrets
+          secret:
+            secretName: {{ include "talos-cloud-controller-manager.serviceAccountName" . }}-talos-secrets
+            defaultMode: 416 # 0640
