@@ -1,0 +1,7 @@
+
+image:
+  repository: ghcr.io/sergelogvinov/talos-cloud-controller-manager
+  pullPolicy: Always
+  tag: latest
+
+logVerbosityLevel: 4

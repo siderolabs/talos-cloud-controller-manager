@@ -1,0 +1,12 @@
+.git/
+**/.gitignore
+charts/
+Dockerfile
+/talos-cloud-controller-manager*
+#
+# other
+*.md
+*.yml
+*.zip
+*.sql
+.vscode/

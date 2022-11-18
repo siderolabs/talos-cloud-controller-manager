@@ -1,0 +1,5 @@
+
+To check service account permission, run:
+```
+kubectl auth can-i --list --as system:serviceaccount:{{ .Release.Namespace }}:{{ include "talos-cloud-controller-manager.serviceAccountName" . }}
+```
