@@ -79,5 +79,8 @@ tolerations:
   - effect: NoSchedule
     key: node-role.kubernetes.io/control-plane
     operator: Exists
+  - effect: NoSchedule
+    key: node.cloudprovider.kubernetes.io/uninitialized
+    operator: Exists
 
 affinity: {}

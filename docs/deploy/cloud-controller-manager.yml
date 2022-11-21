@@ -92,12 +92,12 @@ rules:
   verbs:
   - create
   - get
-# - apiGroups:
-#   - ""
-#   resources:
-#   - serviceaccounts/token
-#   verbs:
-#   - create
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts/token
+  verbs:
+  - create
 # - apiGroups:
 #   - certificates.k8s.io
 #   resources:
@@ -227,6 +227,9 @@ spec:
       tolerations:
         - effect: NoSchedule
           key: node-role.kubernetes.io/control-plane
+          operator: Exists
+        - effect: NoSchedule
+          key: node.cloudprovider.kubernetes.io/uninitialized
           operator: Exists
       volumes:
         - name: cloud-config
