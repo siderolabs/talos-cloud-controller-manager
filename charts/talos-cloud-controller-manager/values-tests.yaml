@@ -1,0 +1,19 @@
+# Define some variables.
+
+extraArgs:
+  - --cluster-name=kubernetes
+
+podAnnotations:
+  project: test
+
+affinity:
+    nodeAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        nodeSelectorTerms:
+          - matchExpressions:
+              - key: kubernetes.io/role
+                operator: In
+                values:
+                  - control-plane
+
+logVerbosityLevel: 4
