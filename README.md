@@ -1,60 +1,34 @@
-# Talos Cloud Provider Manager
+# Talos Cloud Controller Manager
 
-Thank you for visiting the `Talos Cloud Provider Manager` repository!
+Thank you for visiting the `Talos Cloud Controller Manager` repository!
 
-## Install
+One way to achieve a multi-cloud Kubernetes solution is to use a hybrid cloud approach, where you deploy one Kubernetes cluster on multiple cloud providers and use a tool such as [Omni](https://omni.siderolabs.com) to manage and orchestrate it.
+This allows you to take advantage of the unique features and pricing models of different cloud providers and potentially reduce vendor lock-in.
 
-### Prepare control-plane
+It's also worth noting that Kubernetes itself is designed to be cloud-agnostic and can be deployed on a variety of infrastructure, so you have flexibility in terms of how you want to set up your multi-cloud solution and `Talos Cloud Controller Manager` (CCM) helps you with that.
 
-On control-plane you need to allow [API access feature](https://www.talos.dev/v1.2/reference/configuration/#featuresconfig):
+Cloud controllers are responsible for integrating Kubernetes with the underlying cloud infrastructure, such as managing resources like persistent volumes, load balancers, and networking. Each cloud provider typically has its own cloud controller implementation, and these controllers may have different approaches to managing resources and interacting with the cloud API.
 
-```yaml
-machine:
-  features:
-    kubernetesTalosAPIAccess:
-      enabled: true
-      allowedRoles:
-        - os:reader
-      allowedKubernetesNamespaces:
-        - kube-system
-```
+If you have multiple cloud controllers installed in a single cluster, it's possible that they could interfere with each other or cause conflicts when trying to manage the same resources. This could lead to unpredictable behavior and difficulties in troubleshooting and debugging issues.
 
-### Method 1: talos machine config
-
-```yaml
-cluster:
-  externalCloudProvider:
-    enabled: true
-    manifests:
-      - https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
-```
-
-### Method 2: kubectl
-
-```shell
-kubectl apply -f https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
-```
-
-### Method 3: helm chart
-
-```shell
-helm upgrade -i -n kube-system talos-cloud-controller-manager charts/talos-cloud-controller-manager
-```
+Talos CCM tries to solve these issues and helps you to launch multiple CCMs in one cluster.
 
 ## Features
 
-Talos receives the metadata from a platform and labels the node according to the received data.
+Talos CCM receives the metadata from the Talos platform resource and applies labels to the nodes during the initialization process.
 
 Well-Known [labels](https://kubernetes.io/docs/reference/labels-annotations-taints/):
 * topology.kubernetes.io/region
 * topology.kubernetes.io/zone
 * node.kubernetes.io/instance-type
-* providerID magic string
-* InternalIP and ExternalIP addresses
 
-Talos specific:
+Talos specific labels:
 * node.cloudprovider.kubernetes.io/clustername - talos cluster name
 * node.cloudprovider.kubernetes.io/platform - name of platform
+
+Node specs:
+* providerID magic string
+* InternalIP and ExternalIP addresses
 
 ## Example
 
@@ -82,6 +56,47 @@ status:
     type: ExternalIP
   - address: controlplane-1
     type: Hostname
+```
+
+## Install
+
+### Prepare control-plane
+
+On the control-plane you need to allow [API access feature](https://www.talos.dev/v1.2/reference/configuration/#featuresconfig):
+
+```yaml
+machine:
+  features:
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles:
+        - os:reader
+      allowedKubernetesNamespaces:
+        - kube-system
+```
+
+### Method 1: talos machine config
+
+This method has a bug [6663](https://github.com/siderolabs/talos/issues/6663)
+
+```yaml
+cluster:
+  externalCloudProvider:
+    enabled: true
+    manifests:
+      - https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
+```
+
+### Method 2: kubectl
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
+```
+
+### Method 3: helm chart
+
+```shell
+helm upgrade -i -n kube-system talos-cloud-controller-manager charts/talos-cloud-controller-manager
 ```
 
 ## Community
