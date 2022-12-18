@@ -8,7 +8,7 @@ on:
 jobs:
   conform:
     name: Conformance
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -18,5 +18,5 @@ jobs:
       - name: Checkout main branch
         run: git fetch --no-tags origin main:main
 
-      - name: Conform Action
+      - name: Conform action
         uses: talos-systems/conform@v0.1.0-alpha.27
