@@ -188,11 +188,11 @@ spec:
               - ALL
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/sergelogvinov/talos-cloud-controller-manager:latest"
-          imagePullPolicy: Always
+          image: "ghcr.io/siderolabs/talos-cloud-controller-manager:v1.3.0"
+          imagePullPolicy: IfNotPresent
           command: ["/talos-cloud-controller-manager"]
           args:
-            - --v=4
+            - --v=2
             - --cloud-provider=talos
             - --cloud-config=/etc/talos/ccm-config.yaml
             - --controllers=cloud-node
