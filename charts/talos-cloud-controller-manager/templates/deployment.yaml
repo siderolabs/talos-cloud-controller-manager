@@ -4,6 +4,7 @@ metadata:
   name: {{ include "talos-cloud-controller-manager.fullname" . }}
   labels:
     {{- include "talos-cloud-controller-manager.labels" . | nindent 4 }}
+  namespace: {{ .Release.Namespace }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:

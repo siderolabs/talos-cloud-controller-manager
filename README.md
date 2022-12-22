@@ -77,8 +77,6 @@ machine:
 
 ### Method 1: talos machine config
 
-This method has a bug [6663](https://github.com/siderolabs/talos/issues/6663)
-
 ```yaml
 cluster:
   externalCloudProvider:
