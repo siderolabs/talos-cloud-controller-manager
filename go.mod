@@ -6,7 +6,7 @@ go 1.19
 replace cloud.google.com/go => cloud.google.com/go v0.105.0 //nolint:gomoddirectives
 
 require (
-	github.com/cosi-project/runtime v0.2.0
+	github.com/cosi-project/runtime v0.2.1
 	github.com/siderolabs/net v0.4.0
 	github.com/siderolabs/talos/pkg/machinery v1.3.0
 	github.com/spf13/pflag v1.0.5
