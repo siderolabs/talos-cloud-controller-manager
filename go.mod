@@ -2,23 +2,20 @@ module github.com/siderolabs/talos-cloud-controller-manager
 
 go 1.19
 
-// To solve go mod tidy issue.
-replace cloud.google.com/go => cloud.google.com/go v0.105.0 //nolint:gomoddirectives
-
 require (
-	github.com/cosi-project/runtime v0.2.0
+	github.com/cosi-project/runtime v0.2.1
 	github.com/siderolabs/net v0.4.0
-	github.com/siderolabs/talos/pkg/machinery v1.3.0
+	github.com/siderolabs/talos/pkg/machinery v1.3.4
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.1
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/v3 v3.0.3
-	k8s.io/api v0.26.0
-	k8s.io/apimachinery v0.26.0
-	k8s.io/client-go v0.26.0
-	k8s.io/cloud-provider v0.26.0
-	k8s.io/component-base v0.26.0
-	k8s.io/klog/v2 v2.80.1
+	k8s.io/api v0.26.1
+	k8s.io/apimachinery v0.26.1
+	k8s.io/client-go v0.26.1
+	k8s.io/cloud-provider v0.26.1
+	k8s.io/component-base v0.26.1
+	k8s.io/klog/v2 v2.90.0
 )
 
 require (
@@ -54,7 +51,7 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/cel-go v0.12.5 // indirect
+	github.com/google/cel-go v0.12.6 // indirect
 	github.com/google/gnostic v0.5.7-v3refs // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/google/gofuzz v1.1.0 // indirect
@@ -129,13 +126,13 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apiserver v0.26.0 // indirect
-	k8s.io/component-helpers v0.26.0 // indirect
-	k8s.io/controller-manager v0.26.0 // indirect
-	k8s.io/kms v0.26.0 // indirect
+	k8s.io/apiserver v0.26.1 // indirect
+	k8s.io/component-helpers v0.26.1 // indirect
+	k8s.io/controller-manager v0.26.1 // indirect
+	k8s.io/kms v0.26.1 // indirect
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280 // indirect
 	k8s.io/utils v0.0.0-20221107191617-1a15be271d1d // indirect
-	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.0.33 // indirect
+	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.0.35 // indirect
 	sigs.k8s.io/json v0.0.0-20220713155537-f223a00ba0e2 // indirect
 	sigs.k8s.io/structured-merge-diff/v4 v4.2.3 // indirect
 	sigs.k8s.io/yaml v1.3.0 // indirect
