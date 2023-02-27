@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/cosi-project/runtime v0.2.1
 	github.com/siderolabs/net v0.4.0
-	github.com/siderolabs/talos/pkg/machinery v1.3.4
+	github.com/siderolabs/talos/pkg/machinery v1.3.5
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.1
 	gopkg.in/yaml.v3 v3.0.1
@@ -88,7 +88,7 @@ require (
 	github.com/siderolabs/crypto v0.4.0 // indirect
 	github.com/siderolabs/gen v0.4.1 // indirect
 	github.com/siderolabs/go-api-signature v0.2.2 // indirect
-	github.com/siderolabs/go-blockdevice v0.4.1 // indirect
+	github.com/siderolabs/go-blockdevice v0.4.3 // indirect
 	github.com/siderolabs/go-debug v0.2.2 // indirect
 	github.com/siderolabs/go-pointer v1.0.0 // indirect
 	github.com/siderolabs/protoenc v0.2.0 // indirect
@@ -115,9 +115,9 @@ require (
 	golang.org/x/net v0.3.1-0.20221206200815-1e63c2f08a10 // indirect
 	golang.org/x/oauth2 v0.1.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
 	golang.org/x/term v0.3.0 // indirect
-	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6 // indirect
