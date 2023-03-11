@@ -75,8 +75,10 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 
 		addresses := getNodeAddresses(i.c.config, meta.Platform, providedIP, ifaces)
 
-		if meta.Hostname != "" && len(addresses) > 0 {
-			addresses = append(addresses, v1.NodeAddress{Type: v1.NodeHostName, Address: meta.Hostname})
+		addresses = append(addresses, v1.NodeAddress{Type: v1.NodeHostName, Address: node.Name})
+
+		if meta.Hostname != "" && strings.IndexByte(meta.Hostname, '.') > 0 {
+			addresses = append(addresses, v1.NodeAddress{Type: v1.NodeInternalDNS, Address: meta.Hostname})
 		}
 
 		if err := syncNodeLabels(i.c, node, meta); err != nil {
@@ -155,6 +157,10 @@ func syncNodeLabels(c *client, node *v1.Node, meta *runtime.PlatformMetadataSpec
 
 	if meta.Platform != "" && nodeLabels[ClusterNodePlatformLabel] != meta.Platform {
 		labelsToUpdate[ClusterNodePlatformLabel] = meta.Platform
+	}
+
+	if meta.Spot && nodeLabels[ClusterNodeLifeCycleLabel] != "spot" {
+		labelsToUpdate[ClusterNodeLifeCycleLabel] = "spot"
 	}
 
 	if clusterName := c.talos.GetClusterName(); clusterName != "" && nodeLabels[ClusterNameNodeLabel] != clusterName {

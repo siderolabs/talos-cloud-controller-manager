@@ -25,6 +25,7 @@ Well-Known [labels](https://kubernetes.io/docs/reference/labels-annotations-tain
 Talos specific labels:
 * node.cloudprovider.kubernetes.io/clustername - talos cluster name
 * node.cloudprovider.kubernetes.io/platform - name of platform
+* node.cloudprovider.kubernetes.io/lifecycle - spot instance type
 
 Node specs:
 * providerID magic string

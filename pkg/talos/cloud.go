@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	// ProviderName is the name of the Talo provider.
+	// ProviderName is the name of the Talos provider.
 	ProviderName = "talos"
 	// ServiceAccountName is the service account name used in kube-system namespace.
 	ServiceAccountName = "talos-cloud-controller-manager"
@@ -19,6 +19,8 @@ const (
 	ClusterNameNodeLabel = "node.cloudprovider.kubernetes.io/clustername"
 	// ClusterNodePlatformLabel is the node label of platform name.
 	ClusterNodePlatformLabel = "node.cloudprovider.kubernetes.io/platform"
+	// ClusterNodeLifeCycleLabel is a life cycle type of compute node.
+	ClusterNodeLifeCycleLabel = "node.cloudprovider.kubernetes.io/lifecycle"
 )
 
 type cloud struct {
