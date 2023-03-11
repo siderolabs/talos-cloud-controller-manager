@@ -7,6 +7,7 @@ PUSH ?= false
 
 SHA ?= $(shell git describe --match=none --always --abbrev=8 --dirty)
 TAG ?= $(shell git describe --tag --always --match v[0-9]\*)
+GO_LDFLAGS ?= -ldflags '-X k8s.io/component-base/version.gitVersion=$(TAG)'
 
 OS ?= $(shell go env GOOS)
 ARCH ?= $(shell go env GOARCH)
@@ -17,6 +18,8 @@ TESTARGS ?= "-v"
 BUILD_ARGS := --platform=$(PLATFORM)
 ifeq ($(PUSH),true)
 BUILD_ARGS += --push=$(PUSH)
+else
+BUILD_ARGS += --output type=docker
 endif
 
 ######
@@ -48,7 +51,7 @@ build-all-archs:
 
 .PHONY: build
 build: ## Build
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build \
+	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build $(GO_LDFLAGS) \
 		-o talos-cloud-controller-manager-$(ARCH) ./cmd/talos-cloud-controller-manager
 
 .PHONY: run
@@ -86,5 +89,6 @@ docker-init:
 
 images:
 	@docker buildx build $(BUILD_ARGS) \
+		--build-arg TAG=$(TAG) \
 		-t $(IMAGE):$(TAG) \
 		-f Dockerfile .

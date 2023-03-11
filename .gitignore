@@ -3,5 +3,6 @@
 #
 /talos-cloud-controller-manager*
 /kubeconfig
+/talosconfig
 #
 /docs/*.go

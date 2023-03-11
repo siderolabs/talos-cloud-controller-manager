@@ -1,20 +1,20 @@
 module github.com/siderolabs/talos-cloud-controller-manager
 
-go 1.19
+go 1.20
 
 require (
 	github.com/cosi-project/runtime v0.2.1
 	github.com/siderolabs/net v0.4.0
-	github.com/siderolabs/talos/pkg/machinery v1.3.4
+	github.com/siderolabs/talos/pkg/machinery v1.3.5
 	github.com/spf13/pflag v1.0.5
-	github.com/stretchr/testify v1.8.1
+	github.com/stretchr/testify v1.8.2
 	gopkg.in/yaml.v3 v3.0.1
-	gotest.tools/v3 v3.0.3
-	k8s.io/api v0.26.1
-	k8s.io/apimachinery v0.26.1
-	k8s.io/client-go v0.26.1
-	k8s.io/cloud-provider v0.26.1
-	k8s.io/component-base v0.26.1
+	gotest.tools/v3 v3.4.0
+	k8s.io/api v0.26.2
+	k8s.io/apimachinery v0.26.2
+	k8s.io/client-go v0.26.2
+	k8s.io/cloud-provider v0.26.2
+	k8s.io/component-base v0.26.2
 	k8s.io/klog/v2 v2.90.0
 )
 
@@ -88,7 +88,7 @@ require (
 	github.com/siderolabs/crypto v0.4.0 // indirect
 	github.com/siderolabs/gen v0.4.1 // indirect
 	github.com/siderolabs/go-api-signature v0.2.2 // indirect
-	github.com/siderolabs/go-blockdevice v0.4.1 // indirect
+	github.com/siderolabs/go-blockdevice v0.4.3 // indirect
 	github.com/siderolabs/go-debug v0.2.2 // indirect
 	github.com/siderolabs/go-pointer v1.0.0 // indirect
 	github.com/siderolabs/protoenc v0.2.0 // indirect
@@ -112,12 +112,12 @@ require (
 	go.uber.org/multierr v1.8.0 // indirect
 	go.uber.org/zap v1.23.0 // indirect
 	golang.org/x/crypto v0.1.0 // indirect
-	golang.org/x/net v0.3.1-0.20221206200815-1e63c2f08a10 // indirect
+	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.1.0 // indirect
 	golang.org/x/sync v0.1.0 // indirect
-	golang.org/x/sys v0.3.0 // indirect
-	golang.org/x/term v0.3.0 // indirect
-	golang.org/x/text v0.5.0 // indirect
+	golang.org/x/sys v0.5.0 // indirect
+	golang.org/x/term v0.5.0 // indirect
+	golang.org/x/text v0.7.0 // indirect
 	golang.org/x/time v0.0.0-20220210224613-90d013bbcef8 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/genproto v0.0.0-20221118155620-16455021b5e6 // indirect
@@ -126,10 +126,10 @@ require (
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apiserver v0.26.1 // indirect
-	k8s.io/component-helpers v0.26.1 // indirect
-	k8s.io/controller-manager v0.26.1 // indirect
-	k8s.io/kms v0.26.1 // indirect
+	k8s.io/apiserver v0.26.2 // indirect
+	k8s.io/component-helpers v0.26.2 // indirect
+	k8s.io/controller-manager v0.26.2 // indirect
+	k8s.io/kms v0.26.2 // indirect
 	k8s.io/kube-openapi v0.0.0-20221012153701-172d655c2280 // indirect
 	k8s.io/utils v0.0.0-20221107191617-1a15be271d1d // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.0.35 // indirect
