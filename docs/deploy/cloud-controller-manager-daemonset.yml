@@ -178,7 +178,7 @@ spec:
 ---
 # Source: talos-cloud-controller-manager/templates/deployment.yaml
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: talos-cloud-controller-manager
   labels:
@@ -189,8 +189,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 spec:
-  replicas: 1
-  strategy:
+  updateStrategy:
     type: RollingUpdate
   selector:
     matchLabels:
@@ -209,6 +208,8 @@ spec:
         runAsGroup: 10258
         runAsNonRoot: true
         runAsUser: 10258
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
       containers:
         - name: talos-cloud-controller-manager
           securityContext:
@@ -229,6 +230,11 @@ spec:
             - --leader-elect-resource-name=cloud-controller-manager-talos
             - --use-service-account-credentials
             - --secure-port=50258
+          env:
+            - name: TALOS_ENDPOINTS
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
           ports:
             - containerPort: 50258
               name: https

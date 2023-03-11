@@ -2,49 +2,63 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# -- Number of CCM replicas to deploy.
 replicaCount: 1
 
 image:
+  # -- CCM image repository.
   repository: ghcr.io/siderolabs/talos-cloud-controller-manager
+  # -- Pull policy: IfNotPresent or Always.
   pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
+  # -- Overrides the image tag whose default is the chart appVersion.
   tag: ""
 
+# -- Optionally specify an array of imagePullSecrets.
+# Secrets must be manually created in the namespace.
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
+# -- String to partially override deployment name.
 nameOverride: ""
+# -- String to fully override deployment name.
 fullnameOverride: ""
 
-# Any extra arguments for talos-cloud-controller-manager
+# -- Any extra arguments for talos-cloud-controller-manager
 extraArgs: []
   # - --cluster-name=kubernetes
 
-# List of controllers should be enabled.
+# -- List of controllers should be enabled.
 # Use '*' to enable all controllers.
-# Prefix a controller with '-' to disable it.
+# Support only `cloud-node` controller.
 enabledControllers:
   - cloud-node
   # - cloud-node-lifecycle
   # - route
   # - service
 
-# Log verbosity level.
-# See https://github.com/kubernetes/community/blob/master/contributors/devel/sig-instrumentation/logging.md
+# -- Log verbosity level. See https://github.com/kubernetes/community/blob/master/contributors/devel/sig-instrumentation/logging.md
 # for description of individual verbosity levels.
 logVerbosityLevel: 2
 
+# -- Pods Service Account.
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
 serviceAccount:
-  # Specifies whether a service account should be created
+  # -- Specifies whether a service account should be created.
   create: true
-  # Annotations to add to the service account
+  # -- Annotations to add to the service account.
   annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
+  # -- The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template.
   name: ""
 
+# -- CCM pods' priorityClassName.
 priorityClassName: system-cluster-critical
 
+# -- Annotations for data pods.
+# ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
 podAnnotations: {}
 
+# -- Pods Security Context.
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 podSecurityContext:
   runAsNonRoot: true
   runAsUser: 10258
@@ -52,6 +66,8 @@ podSecurityContext:
   fsGroup: 10258
   fsGroupChangePolicy: "OnRootMismatch"
 
+# -- Container Security Context.
+# ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
@@ -60,6 +76,16 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
+service:
+  # -- Service HTTPS port to expose controller.
+  port: 50258
+  # -- Container HTTPS port.
+  containerPort: 50258
+  # -- Additional custom annotations for Service.
+  annotations: {}
+
+# -- Resource requests and limits.
+# ref: http://kubernetes.io/docs/user-guide/compute-resources/
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -72,9 +98,23 @@ resources:
     cpu: 10m
     memory: 64Mi
 
+# -- Deploy CCM  in Daemonset mode.
+useDaemonSet: false
+
+# -- Deployment update stategy type.
+# ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment
+updateStrategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxUnavailable: 1
+
+# -- Node labels for data pods assignment.
+# ref: https://kubernetes.io/docs/user-guide/node-selection/
 nodeSelector:
   node-role.kubernetes.io/control-plane: ""
 
+# -- Tolerations for data pods assignment.
+# ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
 tolerations:
   - effect: NoSchedule
     key: node-role.kubernetes.io/control-plane
@@ -83,4 +123,6 @@ tolerations:
     key: node.cloudprovider.kubernetes.io/uninitialized
     operator: Exists
 
+# -- Affinity for data pods assignment.
+# ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
 affinity: {}

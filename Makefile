@@ -76,6 +76,11 @@ docs:
 	helm template -n kube-system talos-cloud-controller-manager \
 		--set-string image.tag=$(TAG) \
 		charts/talos-cloud-controller-manager > docs/deploy/cloud-controller-manager.yml
+	helm template -n kube-system talos-cloud-controller-manager \
+		--set-string image.tag=$(TAG) \
+		--set useDaemonSet=true \
+		charts/talos-cloud-controller-manager > docs/deploy/cloud-controller-manager-daemonset.yml
+	helm-docs charts/talos-cloud-controller-manager
 
 	git-chglog --config hack/chglog-config.yml -o CHANGELOG.md
 

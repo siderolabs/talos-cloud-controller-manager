@@ -1,12 +1,23 @@
 apiVersion: apps/v1
+{{- if .Values.useDaemonSet }}
+kind: DaemonSet
+{{- else }}
 kind: Deployment
+{{- end }}
 metadata:
   name: {{ include "talos-cloud-controller-manager.fullname" . }}
   labels:
     {{- include "talos-cloud-controller-manager.labels" . | nindent 4 }}
   namespace: {{ .Release.Namespace }}
 spec:
+  {{- if not .Values.useDaemonSet }}
   replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: {{ .Values.updateStrategy.type }}
+  {{- else }}
+  updateStrategy:
+    type: {{ .Values.updateStrategy.type }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "talos-cloud-controller-manager.selectorLabels" . | nindent 6 }}
@@ -26,6 +37,10 @@ spec:
       serviceAccountName: {{ include "talos-cloud-controller-manager.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.useDaemonSet }}
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
@@ -40,18 +55,25 @@ spec:
             - --controllers={{- trimAll "," (include "talos-cloud-controller-manager.enabledControllers" . ) }}
             - --leader-elect-resource-name=cloud-controller-manager-talos
             - --use-service-account-credentials
-            - --secure-port=10258
+            - --secure-port={{ .Values.service.containerPort }}
           {{- with .Values.extraArgs }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- if .Values.useDaemonSet }}
+          env:
+            - name: TALOS_ENDPOINTS
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          {{- end }}
           ports:
-            - containerPort: 10258
+            - containerPort: {{ .Values.service.containerPort }}
               name: https
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /healthz
-              port: 10258
+              port: https
               scheme: HTTPS
             initialDelaySeconds: 20
             periodSeconds: 30
