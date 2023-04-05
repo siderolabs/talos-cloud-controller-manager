@@ -9,7 +9,7 @@ import "testing"
 // 	return cfg
 // }
 
-func TestNewCloud(t *testing.T) {
+func TestNewCloud(*testing.T) {
 	// cfg := Config()
 
 	// ccm, err := newCloud(&cfg)

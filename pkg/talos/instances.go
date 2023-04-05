@@ -28,7 +28,7 @@ func newInstances(client *client) *instances {
 
 // InstanceExists returns true if the instance for the given node exists according to the cloud provider.
 // Use the node.name or node.spec.providerID field to find the node in the cloud provider.
-func (i *instances) InstanceExists(ctx context.Context, node *v1.Node) (bool, error) {
+func (i *instances) InstanceExists(_ context.Context, node *v1.Node) (bool, error) {
 	klog.V(4).Info("instances.InstanceExists() called node: ", node.Name)
 
 	return true, nil
@@ -36,7 +36,7 @@ func (i *instances) InstanceExists(ctx context.Context, node *v1.Node) (bool, er
 
 // InstanceShutdown returns true if the instance is shutdown according to the cloud provider.
 // Use the node.name or node.spec.providerID field to find the node in the cloud provider.
-func (i *instances) InstanceShutdown(ctx context.Context, node *v1.Node) (bool, error) {
+func (i *instances) InstanceShutdown(_ context.Context, node *v1.Node) (bool, error) {
 	klog.V(4).Info("instances.InstanceShutdown() called, node: ", node.Name)
 
 	return true, nil

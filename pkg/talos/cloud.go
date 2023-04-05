@@ -78,6 +78,14 @@ func (c *cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, 
 		return
 	}
 
+	// Broadcast the upstream stop signal to all provider-level goroutines
+	// watching the provider's context for cancellation.
+	go func(provider *cloud) {
+		<-stop
+		klog.V(3).Infof("received cloud provider termination signal")
+		provider.stop()
+	}(c)
+
 	klog.Infof("talos initialized")
 }
 

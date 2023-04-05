@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-func TestGetNodeMetadata(t *testing.T) {
+func TestGetNodeMetadata(*testing.T) {
 }
 
-func TestGetNodeIfaces(t *testing.T) {
+func TestGetNodeIfaces(*testing.T) {
 }
