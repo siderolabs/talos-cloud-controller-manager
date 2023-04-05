@@ -48,13 +48,6 @@ func (i *instances) InstanceShutdown(_ context.Context, node *v1.Node) (bool, er
 func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloudprovider.InstanceMetadata, error) {
 	klog.V(4).Info("instances.InstanceMetadata() called, node: ", node.Name)
 
-	// Skip initialized nodes.
-	if i.c.config.Global.SkipForeignNode && !strings.HasPrefix(node.Spec.ProviderID, ProviderName) {
-		klog.V(4).Infof("instances.InstanceMetadata() node %s has providerID: %s, skipped", node.Name, node.Spec.ProviderID)
-
-		return &cloudprovider.InstanceMetadata{}, nil
-	}
-
 	if providedIP, ok := node.ObjectMeta.Annotations[cloudproviderapi.AnnotationAlphaProvidedIPAddr]; ok {
 		meta, err := i.c.getNodeMetadata(ctx, providedIP)
 		if err != nil {
@@ -81,8 +74,13 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			addresses = append(addresses, v1.NodeAddress{Type: v1.NodeInternalDNS, Address: meta.Hostname})
 		}
 
-		if err := syncNodeLabels(i.c, node, meta); err != nil {
-			klog.Errorf("failed update labels for node %s, %w", node.Name, err)
+		// Skip initialized nodes.
+		if i.c.config.Global.SkipForeignNode && !strings.HasPrefix(node.Spec.ProviderID, ProviderName) {
+			klog.V(4).Infof("instances.InstanceMetadata() node %s has foreign providerID: %s, skipped", node.Name, node.Spec.ProviderID)
+
+			if err := syncNodeLabels(i.c, node, meta); err != nil {
+				klog.Errorf("failed update labels for node %s, %w", node.Name, err)
+			}
 		}
 
 		return &cloudprovider.InstanceMetadata{
