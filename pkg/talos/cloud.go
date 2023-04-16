@@ -5,6 +5,8 @@ import (
 	"context"
 	"io"
 
+	"github.com/siderolabs/talos-cloud-controller-manager/pkg/certificatesigningrequest"
+
 	cloudprovider "k8s.io/cloud-provider"
 	"k8s.io/klog/v2"
 )
@@ -24,9 +26,10 @@ const (
 )
 
 type cloud struct {
-	cfg         *cloudConfig
-	client      *client
-	instancesV2 cloudprovider.InstancesV2
+	cfg           *cloudConfig
+	client        *client
+	instancesV2   cloudprovider.InstancesV2
+	csrController *certificatesigningrequest.Reconciler
 
 	ctx  context.Context //nolint:containedctx
 	stop func()
@@ -85,6 +88,11 @@ func (c *cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, 
 		klog.V(3).Infof("received cloud provider termination signal")
 		provider.stop()
 	}(c)
+
+	if c.cfg.Global.ApproveNodeCSR {
+		c.csrController = certificatesigningrequest.NewCsrController(c.client.kclient, csrNodeChecks)
+		go c.csrController.Run(c.ctx)
+	}
 
 	klog.Infof("talos initialized")
 }

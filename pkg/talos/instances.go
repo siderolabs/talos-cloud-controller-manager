@@ -2,6 +2,7 @@ package talos
 
 import (
 	"context"
+	"crypto/x509"
 	"fmt"
 	"strings"
 
@@ -10,10 +11,13 @@ import (
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
 
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	clientkubernetes "k8s.io/client-go/kubernetes"
 	cloudprovider "k8s.io/cloud-provider"
 	cloudproviderapi "k8s.io/cloud-provider/api"
 	cloudnodeutil "k8s.io/cloud-provider/node/helpers"
 	"k8s.io/klog/v2"
+	"k8s.io/utils/strings/slices"
 )
 
 type instances struct {
@@ -39,7 +43,7 @@ func (i *instances) InstanceExists(_ context.Context, node *v1.Node) (bool, erro
 func (i *instances) InstanceShutdown(_ context.Context, node *v1.Node) (bool, error) {
 	klog.V(4).Info("instances.InstanceShutdown() called, node: ", node.Name)
 
-	return true, nil
+	return false, nil
 }
 
 // InstanceMetadata returns the instance's metadata. The values returned in InstanceMetadata are
@@ -172,4 +176,35 @@ func syncNodeLabels(c *client, node *v1.Node, meta *runtime.PlatformMetadataSpec
 	}
 
 	return nil
+}
+
+// TODO: add more checks, like domain name, worker nodes don't have controlplane IPs, etc...
+func csrNodeChecks(ctx context.Context, kclient clientkubernetes.Interface, x509cr *x509.CertificateRequest) (bool, error) {
+	node, err := kclient.CoreV1().Nodes().Get(ctx, x509cr.DNSNames[0], metav1.GetOptions{})
+	if err != nil {
+		return false, fmt.Errorf("failed to get node %s: %w", x509cr.DNSNames[0], err)
+	}
+
+	var nodeAddrs []string
+
+	if node != nil {
+		if providedIP, ok := node.ObjectMeta.Annotations[cloudproviderapi.AnnotationAlphaProvidedIPAddr]; ok {
+			nodeAddrs = append(nodeAddrs, providedIP)
+		}
+
+		for _, ip := range node.Status.Addresses {
+			nodeAddrs = append(nodeAddrs, ip.Address)
+		}
+
+		for _, ip := range x509cr.IPAddresses {
+			if !slices.Contains(nodeAddrs, ip.String()) {
+				return false, fmt.Errorf("csrNodeChecks: CSR %s Node IP addresses don't match corresponding "+
+					"Node IP addresses %q, got %q", x509cr.DNSNames[0], nodeAddrs, ip)
+			}
+		}
+
+		return true, nil
+	}
+
+	return false, fmt.Errorf("failed to get node %s", x509cr.DNSNames[0])
 }

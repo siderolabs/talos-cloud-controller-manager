@@ -12,6 +12,8 @@ import (
 
 type cloudConfig struct {
 	Global struct {
+		// Approve Node Certificate Signing Request.
+		ApproveNodeCSR bool `yaml:"approveNodeCSR,omitempty"`
 		// Talos API endpoints.
 		Endpoints []string `yaml:"endpoints,omitempty"`
 		// Do not update foreign initialized node.

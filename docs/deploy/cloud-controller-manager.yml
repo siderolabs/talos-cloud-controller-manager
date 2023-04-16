@@ -43,6 +43,7 @@ metadata:
 data:
   ccm-config.yaml: |
     global:
+      approveNodeCSR: true
 ---
 # Source: talos-cloud-controller-manager/templates/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -101,27 +102,27 @@ rules:
   - serviceaccounts/token
   verbs:
   - create
-# - apiGroups:
-#   - certificates.k8s.io
-#   resources:
-#   - certificatesigningrequests
-#   verbs:
-#   - list
-#   - watch
-# - apiGroups:
-#   - certificates.k8s.io
-#   resources:
-#   - certificatesigningrequests/approval
-#   verbs:
-#   - update
-# - apiGroups:
-#   - certificates.k8s.io
-#   resources:
-#   - signers
-#   resourceNames:
-#   - kubernetes.io/kubelet-serving
-#   verbs:
-#   - approve
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - certificatesigningrequests
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - certificatesigningrequests/approval
+  verbs:
+  - update
+- apiGroups:
+  - certificates.k8s.io
+  resources:
+  - signers
+  resourceNames:
+  - kubernetes.io/kubelet-serving
+  verbs:
+  - approve
 ---
 # Source: talos-cloud-controller-manager/templates/rolebinding.yaml
 kind: ClusterRoleBinding

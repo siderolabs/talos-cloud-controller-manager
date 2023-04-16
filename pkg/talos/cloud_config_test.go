@@ -15,6 +15,7 @@ func TestReadCloudConfig(t *testing.T) {
 
 	cfg, err := readCloudConfig(strings.NewReader(`
 global:
+    approveNodeCSR: true
     preferIPv6: true
 `))
 	if err != nil {
@@ -27,5 +28,9 @@ global:
 
 	if !cfg.Global.PreferIPv6 {
 		t.Errorf("incorrect preferIPv6: %v", cfg.Global.PreferIPv6)
+	}
+
+	if !cfg.Global.ApproveNodeCSR {
+		t.Errorf("incorrect ApproveNodeCSR: %v", cfg.Global.ApproveNodeCSR)
 	}
 }
