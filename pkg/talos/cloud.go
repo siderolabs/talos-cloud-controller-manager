@@ -90,6 +90,8 @@ func (c *cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, 
 	}(c)
 
 	if c.cfg.Global.ApproveNodeCSR {
+		klog.Infof("Started CSR Node controller")
+
 		c.csrController = certificatesigningrequest.NewCsrController(c.client.kclient, csrNodeChecks)
 		go c.csrController.Run(c.ctx)
 	}

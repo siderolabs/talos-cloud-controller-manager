@@ -239,6 +239,22 @@ func TestValidateKubeletServingCSRInvalid(t *testing.T) {
 			},
 			expectedError: errKeyUsageMismatch,
 		},
+		{
+			msg: "Invalid key usages, ServerAuth missing",
+			x509cr: x509.CertificateRequest{
+				Subject: pkix.Name{
+					CommonName:   cname,
+					Organization: []string{org},
+				},
+				DNSNames:    dnsNames,
+				IPAddresses: ipAddresses,
+			},
+			keyUsages: []certificatesv1.KeyUsage{
+				certificatesv1.UsageDigitalSignature,
+				certificatesv1.UsageDigitalSignature,
+			},
+			expectedError: errKeyUsageMismatch,
+		},
 	}
 
 	for _, testCase := range tests {

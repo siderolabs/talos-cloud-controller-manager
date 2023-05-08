@@ -52,17 +52,11 @@ var (
 	errKeyUsageMismatch           = fmt.Errorf("key usage does not match")
 )
 
-var (
-	kubeletServingRequiredUsages = []certificatesv1.KeyUsage{
-		certificatesv1.UsageKeyEncipherment,
-		certificatesv1.UsageDigitalSignature,
-		certificatesv1.UsageServerAuth,
-	}
-	kubeletServingRequiredUsagesNoRSA = []certificatesv1.KeyUsage{
-		certificatesv1.UsageDigitalSignature,
-		certificatesv1.UsageServerAuth,
-	}
-)
+var kubeletServingRequiredUsages = []certificatesv1.KeyUsage{
+	certificatesv1.UsageKeyEncipherment,
+	certificatesv1.UsageDigitalSignature,
+	certificatesv1.UsageServerAuth,
+}
 
 func validateKubeletServingCSR(req *x509.CertificateRequest, keyUsages []certificatesv1.KeyUsage) error {
 	if len(req.DNSNames) == 0 && len(req.IPAddresses) == 0 {
@@ -85,9 +79,22 @@ func validateKubeletServingCSR(req *x509.CertificateRequest, keyUsages []certifi
 		return errCommonNameNotSystemNode
 	}
 
-	if !reflect.DeepEqual(kubeletServingRequiredUsages, keyUsages) && !reflect.DeepEqual(kubeletServingRequiredUsagesNoRSA, keyUsages) {
-		return errKeyUsageMismatch
+	usageMap := map[certificatesv1.KeyUsage]bool{}
+	for _, u := range kubeletServingRequiredUsages {
+		usageMap[u] = false
 	}
 
-	return nil
+	for _, ku := range keyUsages {
+		if _, u := usageMap[ku]; !u {
+			return errKeyUsageMismatch
+		}
+
+		usageMap[ku] = true
+	}
+
+	if usageMap[certificatesv1.UsageServerAuth] && usageMap[certificatesv1.UsageDigitalSignature] {
+		return nil
+	}
+
+	return errKeyUsageMismatch
 }

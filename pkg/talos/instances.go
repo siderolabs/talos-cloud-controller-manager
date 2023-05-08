@@ -78,13 +78,17 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			addresses = append(addresses, v1.NodeAddress{Type: v1.NodeInternalDNS, Address: meta.Hostname})
 		}
 
-		// Skip initialized nodes.
+		// Foreign node, update network only.
 		if i.c.config.Global.SkipForeignNode && !strings.HasPrefix(node.Spec.ProviderID, ProviderName) {
 			klog.V(4).Infof("instances.InstanceMetadata() node %s has foreign providerID: %s, skipped", node.Name, node.Spec.ProviderID)
 
-			if err := syncNodeLabels(i.c, node, meta); err != nil {
-				klog.Errorf("failed update labels for node %s, %w", node.Name, err)
-			}
+			return &cloudprovider.InstanceMetadata{
+				NodeAddresses: addresses,
+			}, nil
+		}
+
+		if err := syncNodeLabels(i.c, node, meta); err != nil {
+			klog.Errorf("failed update labels for node %s, %w", node.Name, err)
 		}
 
 		return &cloudprovider.InstanceMetadata{
@@ -96,7 +100,7 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 		}, nil
 	}
 
-	klog.V(4).Infof("instances.InstanceMetadata() is kubelet has --cloud-provider=external on the node %s?", node.Name)
+	klog.Warningf("instances.InstanceMetadata() is kubelet has --cloud-provider=external on the node %s?", node.Name)
 
 	return &cloudprovider.InstanceMetadata{}, nil
 }

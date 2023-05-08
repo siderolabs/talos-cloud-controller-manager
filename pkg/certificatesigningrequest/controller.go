@@ -93,13 +93,12 @@ func (r *Reconciler) Run(ctx context.Context) {
 					continue
 				}
 
-				_, err = r.kclient.CertificatesV1().CertificateSigningRequests().UpdateApproval(ctx, csr.Name, csr, metav1.UpdateOptions{})
-				if err != nil {
+				if _, err := r.kclient.CertificatesV1().CertificateSigningRequests().UpdateApproval(ctx, csr.Name, csr, metav1.UpdateOptions{}); err != nil {
 					klog.Errorf("CertificateSigningRequestReconciler: failed to approve/deny CSR %s: %v", csr.Name, err)
 				}
 
 				if !valid {
-					klog.V(3).Infof("CertificateSigningRequestReconciler: has been denied: %s, %+v", csr.Name, err.Error())
+					klog.Warningf("CertificateSigningRequestReconciler: has been denied: %s", csr.Name)
 				} else {
 					klog.V(3).Infof("CertificateSigningRequestReconciler: has been approved: %s", csr.Name)
 				}

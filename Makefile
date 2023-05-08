@@ -5,11 +5,12 @@ IMAGE ?= $(REGISTRY)/$(USERNAME)/$(PROJECT)
 PLATFORM ?= linux/arm64,linux/amd64
 PUSH ?= false
 
+VERSION ?= $(shell git describe --dirty --tag --match='v*')
 SHA ?= $(shell git describe --match=none --always --abbrev=8 --dirty)
-TAG ?= $(shell git describe --tag --always --match v[0-9]\*)
-ifneq ($(TAG),edge)
-GO_LDFLAGS ?= -ldflags '-X k8s.io/component-base/version.gitVersion=$(TAG)'
-endif
+TAG ?= $(VERSION)
+
+GO_LDFLAGS := -s -w
+GO_LDFLAGS += -X k8s.io/component-base/version.gitVersion=$(VERSION)
 
 OS ?= $(shell go env GOOS)
 ARCH ?= $(shell go env GOARCH)
@@ -53,12 +54,12 @@ build-all-archs:
 
 .PHONY: build
 build: ## Build
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build $(GO_LDFLAGS) \
+	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build -ldflags "$(GO_LDFLAGS)" \
 		-o talos-cloud-controller-manager-$(ARCH) ./cmd/talos-cloud-controller-manager
 
 .PHONY: run
 run: build
-	./talos-cloud-controller-manager-$(ARCH) --v=4 --kubeconfig=kubeconfig --cloud-config=hack/talos-config.yaml --controllers=cloud-node \
+	./talos-cloud-controller-manager-$(ARCH) --v=5 --kubeconfig=kubeconfig --cloud-config=hack/talos-config.yaml --controllers=cloud-node \
 		--use-service-account-credentials --leader-elect=false --bind-address=127.0.0.1
 
 .PHONY: lint
@@ -96,6 +97,6 @@ docker-init:
 
 images:
 	@docker buildx build $(BUILD_ARGS) \
-		--build-arg TAG=$(TAG) \
+		--build-arg VERSION="$(VERSION)" \
 		-t $(IMAGE):$(TAG) \
 		-f Dockerfile .
