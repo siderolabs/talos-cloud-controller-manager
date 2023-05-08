@@ -36,7 +36,7 @@ To build this project, you must have the following installed:
 
 - git
 - make
-- golang 1.19
+- golang 1.20+
 - golangci-lint
 
 endef
@@ -47,7 +47,11 @@ help: ## This help menu.
 	@echo "$$HELP_MENU_HEADER"
 	@grep -E '^[a-zA-Z0-9%_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+############
+#
 # Build Abstractions
+#
+############
 
 build-all-archs:
 	@for arch in $(ARCHS); do $(MAKE) ARCH=$${arch} build ; done
@@ -63,16 +67,24 @@ run: build
 		--use-service-account-credentials --leader-elect=false --bind-address=127.0.0.1
 
 .PHONY: lint
-lint: ## Lint
+lint: ## Lint Code
 	golangci-lint run --config .golangci.yml
 
 .PHONY: unit
-unit:
+unit: ## Unit Tests
 	go test -tags=unit $(shell go list ./...) $(TESTARGS)
 
 .PHONY: conformance
 conformance: ## Conformance
 	docker run --rm -it -v $(PWD):/src -w /src ghcr.io/siderolabs/conform:v0.1.0-alpha.27 enforce
+
+############
+
+.PHONY: helm-unit
+helm-unit: ## Helm Unit Tests
+	@helm lint charts/talos-cloud-controller-manager
+	@helm template -f charts/talos-cloud-controller-manager/ci/values.yaml \
+		talos-cloud-controller-manager charts/talos-cloud-controller-manager >/dev/null
 
 .PHONY: docs
 docs:
@@ -80,12 +92,22 @@ docs:
 		--set-string image.tag=$(TAG) \
 		charts/talos-cloud-controller-manager > docs/deploy/cloud-controller-manager.yml
 	helm template -n kube-system talos-cloud-controller-manager \
+		-f charts/talos-cloud-controller-manager/values.edge.yaml \
+		charts/talos-cloud-controller-manager > docs/deploy/cloud-controller-manager-edge.yml
+	helm template -n kube-system talos-cloud-controller-manager \
 		--set-string image.tag=$(TAG) \
 		--set useDaemonSet=true \
 		charts/talos-cloud-controller-manager > docs/deploy/cloud-controller-manager-daemonset.yml
 	helm-docs charts/talos-cloud-controller-manager
 
+release-update:
 	git-chglog --config hack/chglog-config.yml -o CHANGELOG.md
+
+############
+#
+# Docker Abstractions
+#
+############
 
 docker-init:
 	docker run --rm --privileged multiarch/qemu-user-static:register --reset

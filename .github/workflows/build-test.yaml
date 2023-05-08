@@ -9,6 +9,7 @@ on:
       - 'go.sum'
       - 'cmd/**'
       - 'pkg/**'
+      - 'Dockerfile'
 
 jobs:
   build:
@@ -19,6 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Unshallow
+        run: git fetch --prune --unshallow
 
       - name: Set up go
         uses: actions/setup-go@v3
@@ -26,9 +29,9 @@ jobs:
           go-version-file: 'go.mod'
           cache: true
 
-      - name: Build
-        run: make build
       - name: Lint
         uses: golangci/golangci-lint-action@v3
         with:
           args: --config=.golangci.yml
+      - name: Build
+        run: make build

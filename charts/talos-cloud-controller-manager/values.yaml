@@ -35,9 +35,9 @@ enabledControllers:
   # - route
   # - service
 
-# -- List of CCM features.
-# `approveNodeCSR` - check and approve node CSR.
 features:
+  # -- List of CCM features.
+  # `approveNodeCSR` - check and approve node CSR.
   approveNodeCSR: true
 
 # -- Log verbosity level. See https://github.com/kubernetes/community/blob/master/contributors/devel/sig-instrumentation/logging.md
@@ -104,6 +104,7 @@ resources:
     memory: 64Mi
 
 # -- Deploy CCM  in Daemonset mode.
+# CCM will use hostNetwork and host resolv.conf
 useDaemonSet: false
 
 # -- Deployment update stategy type.
