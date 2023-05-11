@@ -61,12 +61,21 @@ status:
 
 ## Install
 
+We need to set the `--cloud-provider=external` flag for each node.
+
+CCM also can approve/sign the [kubelet certificate signing request](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#kubernetes-signers).
+In this case we need to set flag `--rotate-server-certificates=true`.
+
 ### Prepare control-plane
 
 On the control-plane you need to allow [API access feature](https://www.talos.dev/v1.2/reference/configuration/#featuresconfig):
 
 ```yaml
 machine:
+  kubelet:
+    extraArgs:
+      cloud-provider: external
+      rotate-server-certificates: true
   features:
     kubernetesTalosAPIAccess:
       enabled: true
@@ -74,6 +83,16 @@ machine:
         - os:reader
       allowedKubernetesNamespaces:
         - kube-system
+```
+
+### Prepare worker nodes
+
+```yaml
+machine:
+  kubelet:
+    extraArgs:
+      cloud-provider: external
+      rotate-server-certificates: true
 ```
 
 ### Method 1: talos machine config
@@ -88,8 +107,16 @@ cluster:
 
 ### Method 2: kubectl
 
+Latest release:
+
 ```shell
 kubectl apply -f https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
+```
+
+Latest stable version (edge):
+
+```shell
+kubectl apply -f https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager-edge.yml
 ```
 
 ### Method 3: helm chart
