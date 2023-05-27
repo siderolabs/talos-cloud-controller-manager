@@ -11,16 +11,21 @@ import (
 )
 
 type cloudConfig struct {
-	Global struct {
-		// Approve Node Certificate Signing Request.
-		ApproveNodeCSR bool `yaml:"approveNodeCSR,omitempty"`
-		// Talos API endpoints.
-		Endpoints []string `yaml:"endpoints,omitempty"`
-		// Do not update foreign initialized node.
-		SkipForeignNode bool `yaml:"skipForeignNode,omitempty"`
-		// Prefer IPv6.
-		PreferIPv6 bool `yaml:"preferIPv6,omitempty"`
-	} `yaml:"global,omitempty"`
+	// Global configuration.
+	Global cloudConfigGlobal `yaml:"global,omitempty"`
+}
+
+type cloudConfigGlobal struct {
+	// Approve Node Certificate Signing Request.
+	ApproveNodeCSR bool `yaml:"approveNodeCSR,omitempty"`
+	// Talos cluster name.
+	ClusterName string `yaml:"clusterName,omitempty"`
+	// Talos API endpoints.
+	Endpoints []string `yaml:"endpoints,omitempty"`
+	// Do not update foreign initialized node.
+	SkipForeignNode bool `yaml:"skipForeignNode,omitempty"`
+	// Prefer IPv6.
+	PreferIPv6 bool `yaml:"preferIPv6,omitempty"`
 }
 
 func readCloudConfig(config io.Reader) (cloudConfig, error) {

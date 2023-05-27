@@ -5,13 +5,27 @@ import (
 	"testing"
 )
 
-func TestReadCloudConfig(t *testing.T) {
-	t.Setenv("TALOS_ENDPOINTS", "127.0.0.1,127.0.0.2")
-
-	_, err := readCloudConfig(nil)
+func TestReadCloudConfigEmpty(t *testing.T) {
+	cfg, err := readCloudConfig(nil)
 	if err != nil {
 		t.Errorf("Should not fail when no config is provided: %s", err)
 	}
+
+	if len(cfg.Global.Endpoints) != 0 {
+		t.Errorf("incorrect endpoints: %s", cfg.Global.Endpoints)
+	}
+
+	if cfg.Global.PreferIPv6 {
+		t.Errorf("%v is not default value of preferIPv6", cfg.Global.PreferIPv6)
+	}
+
+	if cfg.Global.ApproveNodeCSR {
+		t.Errorf("%v is not default value of ApproveNodeCSR", cfg.Global.ApproveNodeCSR)
+	}
+}
+
+func TestReadCloudConfig(t *testing.T) {
+	t.Setenv("TALOS_ENDPOINTS", "127.0.0.1,127.0.0.2")
 
 	cfg, err := readCloudConfig(strings.NewReader(`
 global:

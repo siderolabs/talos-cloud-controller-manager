@@ -11,9 +11,14 @@ on:
       - 'pkg/**'
       - 'Dockerfile'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
     name: Build
+    timeout-minutes: 10
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -24,6 +29,7 @@ jobs:
         run: git fetch --prune --unshallow
 
       - name: Set up go
+        timeout-minutes: 5
         uses: actions/setup-go@v3
         with:
           go-version-file: 'go.mod'
@@ -35,3 +41,5 @@ jobs:
           args: --config=.golangci.yml
       - name: Build
         run: make build
+      - name: Test
+        run: make unit

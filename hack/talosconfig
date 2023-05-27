@@ -1,0 +1,5 @@
+context: talos
+contexts:
+    talos:
+        endpoints:
+            - 1.2.3.4

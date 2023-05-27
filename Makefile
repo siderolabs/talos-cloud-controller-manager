@@ -63,7 +63,7 @@ build: ## Build
 
 .PHONY: run
 run: build
-	./talos-cloud-controller-manager-$(ARCH) --v=5 --kubeconfig=kubeconfig --cloud-config=hack/talos-config.yaml --controllers=cloud-node \
+	./talos-cloud-controller-manager-$(ARCH) --v=5 --kubeconfig=kubeconfig --cloud-config=hack/ccm-config.yaml --controllers=cloud-node \
 		--use-service-account-credentials --leader-elect=false --bind-address=127.0.0.1
 
 .PHONY: lint

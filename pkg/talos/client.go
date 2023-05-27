@@ -11,7 +11,6 @@ import (
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
 
 	clientkubernetes "k8s.io/client-go/kubernetes"
-	"k8s.io/klog/v2"
 )
 
 type client struct {
@@ -23,22 +22,23 @@ type client struct {
 func newClient(ctx context.Context, config *cloudConfig) (*client, error) {
 	clientOpts := []clienttalos.OptionFunc{}
 
+	if config == nil {
+		return nil, fmt.Errorf("talos cloudConfig is nil")
+	}
+
+	clientOpts = append(clientOpts, clienttalos.WithDefaultConfig())
+
 	if len(config.Global.Endpoints) > 0 {
 		clientOpts = append(clientOpts, clienttalos.WithEndpoints(config.Global.Endpoints...))
-	} else {
-		clientOpts = append(clientOpts, clienttalos.WithDefaultConfig())
+	}
+
+	if config.Global.ClusterName != "" {
+		clientOpts = append(clientOpts, clienttalos.WithCluster(config.Global.ClusterName))
 	}
 
 	talos, err := clienttalos.New(ctx, clientOpts...)
 	if err != nil {
 		return nil, err
-	}
-
-	//nolint:revive
-	if ver, err := talos.Version(ctx); err != nil {
-		return nil, fmt.Errorf("failed to initialized talos client: %w", err)
-	} else {
-		klog.V(4).Infof("talos api version: %s", ver.String())
 	}
 
 	return &client{
