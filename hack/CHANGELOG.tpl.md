@@ -4,11 +4,18 @@
 
 Welcome to the {{ .Tag.Name }} release of Talos CCM!
 
+{{ range .CommitGroups -}}
+### {{ .Title }}
+{{ range .Commits -}}
+- {{ if .Scope }}**{{ .Scope }}:** {{ end }}{{ .Subject }}
+{{ end }}
+{{ end -}}
+
 ### Changelog
 
-{{ range .Commits -}}{{ if ne .Subject "" -}}
+{{ range .Commits -}}{{ if ne .Subject ""}}{{ if not (hasPrefix .Header "chore: release") -}}
 * {{ .Hash.Short }} {{ .Header }}
-{{ end }}{{ end }}
+{{ end }}{{ end }}{{ end }}
 
 {{- if .NoteGroups -}}
 {{ range .NoteGroups -}}

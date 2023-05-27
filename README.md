@@ -15,6 +15,8 @@ Talos CCM tries to solve these issues and helps you to launch multiple CCMs in o
 
 ## Features
 
+### Node initialize
+
 Talos CCM receives the metadata from the Talos platform resource and applies labels to the nodes during the initialization process.
 
 Well-Known [labels](https://kubernetes.io/docs/reference/labels-annotations-taints/):
@@ -30,6 +32,16 @@ Talos specific labels:
 Node specs:
 * providerID magic string
 * InternalIP and ExternalIP addresses
+
+### Node certificate approval
+
+Talos CCM is responsible for validating a node's certificate signing request (CSR) and approving it.
+When a node wants to join a cluster, it generates a CSR, which includes its identity and other relevant information.
+It checks if the CSR is properly formatted, contains all the required information, and matches the node's identity.
+
+By validating and approving node CSRs, Talos CCM plays a crucial role in maintaining the security and integrity of the cluster by ensuring that only trusted and authorized nodes are allowed to have signed kubelet certificate.
+
+The kubelet certificate is used to secure the communication between the kubelet and other components in the cluster, such as the Kubernetes control plane. It ensures that the communication is encrypted and authenticated and preventing a man-in-the-middle (MITM) attack.
 
 ## Example
 
@@ -63,8 +75,7 @@ status:
 
 We need to set the `--cloud-provider=external` flag for each node.
 
-CCM also can approve/sign the [kubelet certificate signing request](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#kubernetes-signers).
-In this case we need to set flag `--rotate-server-certificates=true`.
+To allow CCM approves/signs the [kubelet certificate signing request](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#kubernetes-signers) set the flag `--rotate-server-certificates=true`.
 
 ### Prepare control-plane
 
