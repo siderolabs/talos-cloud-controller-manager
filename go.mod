@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/cosi-project/runtime v0.3.0
 	github.com/siderolabs/net v0.4.0
-	github.com/siderolabs/talos/pkg/machinery v1.4.4
+	github.com/siderolabs/talos/pkg/machinery v1.4.5
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.3
 	gopkg.in/yaml.v3 v3.0.1
