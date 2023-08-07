@@ -2,6 +2,7 @@ REGISTRY ?= ghcr.io
 USERNAME ?= siderolabs
 PROJECT ?= talos-cloud-controller-manager
 IMAGE ?= $(REGISTRY)/$(USERNAME)/$(PROJECT)
+HELMREPO ?= $(REGISTRY)/$(USERNAME)/charts
 PLATFORM ?= linux/arm64,linux/amd64
 PUSH ?= false
 
@@ -25,6 +26,8 @@ else
 BUILD_ARGS += --output type=docker
 endif
 
+COSING_ARGS ?=
+
 ######
 
 # Help Menu
@@ -43,6 +46,7 @@ endef
 
 export HELP_MENU_HEADER
 
+.PHONY: help
 help: ## This help menu.
 	@echo "$$HELP_MENU_HEADER"
 	@grep -E '^[a-zA-Z0-9%_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
@@ -86,6 +90,19 @@ helm-unit: ## Helm Unit Tests
 	@helm template -f charts/talos-cloud-controller-manager/ci/values.yaml \
 		talos-cloud-controller-manager charts/talos-cloud-controller-manager >/dev/null
 
+.PHONY: helm-login
+helm-login: ## Helm Login
+	@echo "${HELM_TOKEN}" | helm registry login $(REGISTRY) --username $(USERNAME) --password-stdin
+
+.PHONY: helm-release
+helm-release: ## Helm Release
+	@rm -rf dist/
+	@helm package charts/talos-cloud-controller-manager -d dist
+	@helm push dist/talos-cloud-controller-manager-*.tgz oci://$(HELMREPO) 2>&1 | tee dist/.digest
+	@cosign sign --yes $(COSING_ARGS) $(HELMREPO)/talos-cloud-controller-manager@$$(cat dist/.digest | awk -F "[, ]+" '/Digest/{print $$NF}')
+
+############
+
 .PHONY: docs
 docs:
 	helm template -n kube-system talos-cloud-controller-manager \
@@ -117,6 +134,11 @@ docker-init:
 	docker context use multiarch
 	docker buildx inspect --bootstrap multiarch
 
+.PHONY: images-cosign
+images-cosign:
+	@cosign sign --yes $(COSING_ARGS) --recursive $(IMAGE):$(TAG)
+
+.PHONY: images
 images:
 	@docker buildx build $(BUILD_ARGS) \
 		--build-arg VERSION="$(VERSION)" \

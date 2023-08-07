@@ -1,14 +1,16 @@
-name: Release
+name: Release Helm Chart
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
+    paths:
+      - 'charts/**'
 
 jobs:
   build-publish:
-    name: "Build image and publish"
-    timeout-minutes: 15
+    name: "Publish helm chart"
+    timeout-minutes: 10
     runs-on: ubuntu-22.04
     permissions:
       contents: read
@@ -17,13 +19,15 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Unshallow
-        run: git fetch --prune --unshallow
+        with:
+          fetch-depth: 0
 
+      - name: Install Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.2
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.1.1
-      - name: Set up docker buildx
-        run: make docker-init
 
       - name: Github registry login
         uses: docker/login-action@v2
@@ -32,9 +36,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
-        run: make images
+      - name: Helm release
+        run: make helm-login helm-release
         env:
-          PUSH: "true"
-      - name: Sign images
-        run: make images-cosign
+          HELM_TOKEN: ${{ secrets.GITHUB_TOKEN }}

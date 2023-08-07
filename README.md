@@ -133,7 +133,7 @@ kubectl apply -f https://raw.githubusercontent.com/siderolabs/talos-cloud-contro
 ### Method 3: helm chart
 
 ```shell
-helm upgrade -i -n kube-system talos-cloud-controller-manager charts/talos-cloud-controller-manager
+helm upgrade -i -n kube-system talos-cloud-controller-manager oci://ghcr.io/siderolabs/charts/talos-cloud-controller-manager
 ```
 
 ## Community
