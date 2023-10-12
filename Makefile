@@ -110,6 +110,7 @@ helm-release: ## Helm Release
 
 .PHONY: docs
 docs:
+	yq -i '.appVersion = "$(TAG)"' charts/talos-cloud-controller-manager/Chart.yaml
 	helm template -n kube-system talos-cloud-controller-manager \
 		--set-string image.tag=$(TAG) \
 		charts/talos-cloud-controller-manager > docs/deploy/cloud-controller-manager.yml
