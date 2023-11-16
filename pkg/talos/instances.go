@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/platform"
+
 	v1 "k8s.io/api/core/v1"
 	cloudprovider "k8s.io/cloud-provider"
 	cloudproviderapi "k8s.io/cloud-provider/api"
@@ -54,6 +56,14 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 		providerID := meta.ProviderID
 		if providerID == "" {
 			providerID = fmt.Sprintf("%s://%s/%s", ProviderName, meta.Platform, providedIP)
+		}
+
+		// Fix for Azure, resource group name must be lower case.
+		if meta.Platform == "azure" {
+			providerID, err = platform.AzureConvertResourceGroupNameToLower(providerID)
+			if err != nil {
+				return nil, fmt.Errorf("error converting resource group name to lower case: %w", err)
+			}
 		}
 
 		ifaces, err := i.c.getNodeIfaces(ctx, providedIP)

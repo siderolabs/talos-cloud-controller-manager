@@ -40,6 +40,9 @@ jobs:
           version: v1.55.2
           args: --config=.golangci.yml
       - name: Build
-        run: make build
+        timeout-minutes: 10
+        run: make images
+        env:
+          PLATFORM: "linux/amd64"
       - name: Test
         run: make unit

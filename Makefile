@@ -60,6 +60,11 @@ help: ## This help menu.
 build-all-archs:
 	@for arch in $(ARCHS); do $(MAKE) ARCH=$${arch} build ; done
 
+.PHONY: clean
+clean: ## Clean
+	rm -rf dist/
+	rm -f talos-cloud-controller-manager-*
+
 .PHONY: build
 build: ## Build
 	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build -ldflags "$(GO_LDFLAGS)" \
