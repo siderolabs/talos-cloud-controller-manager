@@ -89,7 +89,7 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 		}
 
 		if err := syncNodeLabels(i.c, node, meta); err != nil {
-			klog.Errorf("failed update labels for node %s, %w", node.Name, err)
+			klog.Errorf("failed update labels for node %s, %v", node.Name, err)
 		}
 
 		return &cloudprovider.InstanceMetadata{

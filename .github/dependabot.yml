@@ -36,6 +36,11 @@ updates:
           - "k8s.io/client-go"
           - "k8s.io/cloud-provider"
           - "k8s.io/component-base"
+      siderolabs:
+        patterns:
+          - "github.com/siderolabs/net"
+          - "github.com/siderolabs/talos/pkg/machinery"
+          - "github.com/cosi-project/runtime"
 
   - package-ecosystem: "docker"
     directory: "/"
