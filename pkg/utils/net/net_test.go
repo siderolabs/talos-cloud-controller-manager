@@ -106,3 +106,49 @@ func TestSortedNodeIPs(t *testing.T) {
 		})
 	}
 }
+
+func TestPreferedDualStackNodeIPs(t *testing.T) {
+	t.Parallel()
+
+	for _, tt := range []struct { //nolint:govet
+		name       string
+		preferIPv6 bool
+		nodeIPs    []string
+		expected   []string
+	}{
+		{
+			name:       "one nodeIP",
+			preferIPv6: false,
+			nodeIPs:    []string{"192.168.0.1"},
+			expected:   []string{"192.168.0.1"},
+		},
+		{
+			name:       "dualstack nodeIP",
+			preferIPv6: false,
+			nodeIPs:    []string{"192.168.0.1", "fd00::1"},
+			expected:   []string{"192.168.0.1", "fd00::1"},
+		},
+		{
+			name:       "dualstack nodeIP preferIPv6",
+			preferIPv6: true,
+			nodeIPs:    []string{"192.168.0.1", "fd00::1"},
+			expected:   []string{"fd00::1", "192.168.0.1"},
+		},
+		{
+			name:       "dualstack nodeIP preferIPv6 with external IPs",
+			preferIPv6: true,
+			nodeIPs:    []string{"192.168.0.1", "fd00::1", "1.1.1.1", "1111:2222:3333::1", "2000:123:123::9b87:57a7:38bf:6c71"},
+			expected:   []string{"fd00::1", "192.168.0.1"},
+		},
+	} {
+		tt := tt
+
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			result := utilnet.PreferedDualStackNodeIPs(tt.preferIPv6, tt.nodeIPs)
+
+			assert.Equal(t, fmt.Sprintf("%v", tt.expected), fmt.Sprintf("%v", result))
+		})
+	}
+}

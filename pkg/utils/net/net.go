@@ -38,3 +38,44 @@ func SortedNodeIPs(nodeIP string, first, second []string) (res []string) {
 
 	return res
 }
+
+// PreferedDualStackNodeIPs returns the first IPv4 and IPv6 addresses from the list of IPs.
+func PreferedDualStackNodeIPs(preferIPv6 bool, ips []string) []string {
+	var ipv6, ipv4 string
+
+	for _, ip := range ips {
+		if nip, err := netip.ParseAddr(ip); err == nil {
+			if nip.Is6() {
+				if ipv6 == "" {
+					ipv6 = nip.String()
+				}
+			} else {
+				if ipv4 == "" {
+					ipv4 = nip.String()
+				}
+			}
+		}
+	}
+
+	res := []string{}
+
+	if preferIPv6 {
+		if ipv6 != "" {
+			res = append(res, ipv6)
+		}
+
+		if ipv4 != "" {
+			res = append(res, ipv4)
+		}
+	} else {
+		if ipv4 != "" {
+			res = append(res, ipv4)
+		}
+
+		if ipv6 != "" {
+			res = append(res, ipv6)
+		}
+	}
+
+	return res
+}

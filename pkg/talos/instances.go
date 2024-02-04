@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/net"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/platform"
+	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
 
 	v1 "k8s.io/api/core/v1"
 	cloudprovider "k8s.io/cloud-provider"
@@ -46,16 +48,34 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 	klog.V(4).Info("instances.InstanceMetadata() called, node: ", node.Name)
 
 	if providedIP, ok := node.ObjectMeta.Annotations[cloudproviderapi.AnnotationAlphaProvidedIPAddr]; ok {
-		meta, err := i.c.getNodeMetadata(ctx, providedIP)
-		if err != nil {
-			return nil, fmt.Errorf("error getting metadata from the node %s: %w", node.Name, err)
+		nodeIPs := net.PreferedDualStackNodeIPs(i.c.config.Global.PreferIPv6, strings.Split(providedIP, ","))
+
+		var (
+			meta   *runtime.PlatformMetadataSpec
+			err    error
+			nodeIP string
+		)
+
+		for _, ip := range nodeIPs {
+			meta, err = i.c.getNodeMetadata(ctx, ip)
+			if err == nil {
+				nodeIP = ip
+
+				break
+			}
+
+			klog.Errorf("error getting metadata from the node %s: %v", node.Name, err)
+		}
+
+		if meta == nil {
+			return nil, fmt.Errorf("error getting metadata from the node %s", node.Name)
 		}
 
 		klog.V(5).Infof("instances.InstanceMetadata() resource: %+v", meta)
 
 		providerID := meta.ProviderID
 		if providerID == "" {
-			providerID = fmt.Sprintf("%s://%s/%s", ProviderName, meta.Platform, providedIP)
+			providerID = fmt.Sprintf("%s://%s/%s", ProviderName, meta.Platform, nodeIP)
 		}
 
 		// Fix for Azure, resource group name must be lower case.
@@ -66,12 +86,12 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			}
 		}
 
-		ifaces, err := i.c.getNodeIfaces(ctx, providedIP)
+		ifaces, err := i.c.getNodeIfaces(ctx, nodeIP)
 		if err != nil {
 			return nil, fmt.Errorf("error getting interfaces list from the node %s: %w", node.Name, err)
 		}
 
-		addresses := getNodeAddresses(i.c.config, meta.Platform, providedIP, ifaces)
+		addresses := getNodeAddresses(i.c.config, meta.Platform, nodeIPs, ifaces)
 
 		addresses = append(addresses, v1.NodeAddress{Type: v1.NodeHostName, Address: node.Name})
 

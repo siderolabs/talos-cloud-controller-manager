@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/x509"
 	"fmt"
+	"strings"
 
 	utilsnet "github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/net"
 	"github.com/siderolabs/talos/pkg/machinery/resources/network"
@@ -17,11 +18,11 @@ import (
 	"k8s.io/utils/strings/slices"
 )
 
-func getNodeAddresses(config *cloudConfig, platform, nodeIP string, ifaces []network.AddressStatusSpec) []v1.NodeAddress {
+func getNodeAddresses(config *cloudConfig, platform string, nodeIPs []string, ifaces []network.AddressStatusSpec) []v1.NodeAddress {
 	var publicIPv4s, publicIPv6s, publicIPs []string
 
 	switch platform {
-	case "nocloud", "metal":
+	case "nocloud", "metal", "openstack":
 		for _, iface := range ifaces {
 			if iface.LinkName == "kubespan" {
 				continue
@@ -29,6 +30,10 @@ func getNodeAddresses(config *cloudConfig, platform, nodeIP string, ifaces []net
 
 			ip := iface.Address.Addr()
 			if ip.IsGlobalUnicast() && !ip.IsPrivate() {
+				if slices.Contains(nodeIPs, ip.String()) {
+					continue
+				}
+
 				if ip.Is6() {
 					publicIPv6s = append(publicIPv6s, ip.String())
 				} else {
@@ -41,6 +46,10 @@ func getNodeAddresses(config *cloudConfig, platform, nodeIP string, ifaces []net
 			if iface.LinkName == "external" {
 				ip := iface.Address.Addr()
 
+				if slices.Contains(nodeIPs, ip.String()) {
+					continue
+				}
+
 				if ip.Is6() {
 					publicIPv6s = append(publicIPv6s, ip.String())
 				} else {
@@ -50,14 +59,12 @@ func getNodeAddresses(config *cloudConfig, platform, nodeIP string, ifaces []net
 		}
 	}
 
-	addresses := []v1.NodeAddress{{Type: v1.NodeInternalIP, Address: nodeIP}}
-
-	if config.Global.PreferIPv6 {
-		publicIPs = utilsnet.SortedNodeIPs(nodeIP, publicIPv6s, publicIPv4s)
-	} else {
-		publicIPs = utilsnet.SortedNodeIPs(nodeIP, publicIPv4s, publicIPv6s)
+	addresses := []v1.NodeAddress{}
+	for _, ip := range utilsnet.PreferedDualStackNodeIPs(config.Global.PreferIPv6, nodeIPs) {
+		addresses = append(addresses, v1.NodeAddress{Type: v1.NodeInternalIP, Address: ip})
 	}
 
+	publicIPs = utilsnet.PreferedDualStackNodeIPs(config.Global.PreferIPv6, append(publicIPv4s, publicIPv6s...))
 	for _, ip := range publicIPs {
 		addresses = append(addresses, v1.NodeAddress{Type: v1.NodeExternalIP, Address: ip})
 	}
@@ -105,7 +112,7 @@ func csrNodeChecks(ctx context.Context, kclient clientkubernetes.Interface, x509
 
 	if node != nil {
 		if providedIP, ok := node.ObjectMeta.Annotations[cloudproviderapi.AnnotationAlphaProvidedIPAddr]; ok {
-			nodeAddrs = append(nodeAddrs, providedIP)
+			nodeAddrs = append(nodeAddrs, strings.Split(providedIP, ",")...)
 		}
 
 		for _, ip := range node.Status.Addresses {

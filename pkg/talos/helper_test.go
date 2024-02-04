@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net"
 	"net/netip"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -46,6 +47,21 @@ func TestGetNodeAddresses(t *testing.T) {
 			},
 		},
 		{
+			name:       "nocloud has dualstack",
+			cfg:        cfg,
+			platform:   "nocloud",
+			providedIP: "192.168.0.1,fd00:192:168:0::1",
+			ifaces: []network.AddressStatusSpec{
+				{Address: netip.MustParsePrefix("192.168.0.1/24")},
+				{Address: netip.MustParsePrefix("fe80::e0b5:71ff:fe24:7e60/64")},
+				{Address: netip.MustParsePrefix("fd00:192:168:0::1/64")},
+			},
+			expected: []v1.NodeAddress{
+				{Type: v1.NodeInternalIP, Address: "192.168.0.1"},
+				{Type: v1.NodeInternalIP, Address: "fd00:192:168::1"},
+			},
+		},
+		{
 			name:       "nocloud has many PublicIPs",
 			cfg:        cfg,
 			platform:   "nocloud",
@@ -62,14 +78,14 @@ func TestGetNodeAddresses(t *testing.T) {
 			expected: []v1.NodeAddress{
 				{Type: v1.NodeInternalIP, Address: "192.168.0.1"},
 				{Type: v1.NodeExternalIP, Address: "1.2.3.4"},
-				{Type: v1.NodeExternalIP, Address: "2001:1234:4321::32"},
+				{Type: v1.NodeExternalIP, Address: "2001:1234::1"},
 			},
 		},
 		{
 			name:       "nocloud has many PublicIPs (IPv6 preferred)",
 			cfg:        cloudConfig{Global: cloudConfigGlobal{PreferIPv6: true}},
 			platform:   "nocloud",
-			providedIP: "192.168.0.1",
+			providedIP: "192.168.0.1,fd15:1:2::192:168:0:1",
 			ifaces: []network.AddressStatusSpec{
 				{Address: netip.MustParsePrefix("192.168.0.1/24")},
 				{Address: netip.MustParsePrefix("fe80::e0b5:71ff:fe24:7e60/64")},
@@ -80,8 +96,9 @@ func TestGetNodeAddresses(t *testing.T) {
 				{Address: netip.MustParsePrefix("2001:1234:4321::32/64")},
 			},
 			expected: []v1.NodeAddress{
+				{Type: v1.NodeInternalIP, Address: "fd15:1:2:0:192:168:0:1"},
 				{Type: v1.NodeInternalIP, Address: "192.168.0.1"},
-				{Type: v1.NodeExternalIP, Address: "2001:1234:4321::32"},
+				{Type: v1.NodeExternalIP, Address: "2001:1234::1"},
 				{Type: v1.NodeExternalIP, Address: "1.2.3.4"},
 			},
 		},
@@ -124,7 +141,7 @@ func TestGetNodeAddresses(t *testing.T) {
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			addresses := getNodeAddresses(&tt.cfg, tt.platform, tt.providedIP, tt.ifaces)
+			addresses := getNodeAddresses(&tt.cfg, tt.platform, strings.Split(tt.providedIP, ","), tt.ifaces)
 
 			assert.Equal(t, tt.expected, addresses)
 		})
