@@ -104,7 +104,8 @@ resources:
     memory: 64Mi
 
 # -- Deploy CCM  in Daemonset mode.
-# CCM will use hostNetwork and host resolv.conf
+# CCM will use hostNetwork and current node to access kubernetes/talos API
+# You can run it without CNI plugin.
 useDaemonSet: false
 
 # -- Deployment update stategy type.

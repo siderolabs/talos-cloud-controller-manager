@@ -65,6 +65,12 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+            - name: KUBERNETES_SERVICE_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: KUBERNETES_SERVICE_PORT
+              value: "6443"
           {{- end }}
           ports:
             - containerPort: {{ .Values.service.containerPort }}
@@ -95,9 +101,14 @@ spec:
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.tolerations }}
       tolerations:
+      {{- with .Values.tolerations }}
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.useDaemonSet }}
+        - effect: NoSchedule
+          key: node.kubernetes.io/not-ready
+          operator: Exists
       {{- end }}
       volumes:
         - name: cloud-config
