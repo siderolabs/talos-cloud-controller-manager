@@ -47,6 +47,20 @@ func newClient(ctx context.Context, config *cloudConfig) (*client, error) {
 	}, nil
 }
 
+func (c *client) refreshClient(ctx context.Context) error {
+	if _, err := c.talos.Version(ctx); err != nil {
+		talos, err := newClient(ctx, c.config)
+		if err != nil {
+			return fmt.Errorf("failed to reinitialized talos client: %v", err)
+		}
+
+		c.talos.Close() //nolint:errcheck
+		c.talos = talos.talos
+	}
+
+	return nil
+}
+
 func (c *client) getNodeMetadata(ctx context.Context, nodeIP string) (*runtime.PlatformMetadataSpec, error) {
 	nodeCtx := clienttalos.WithNode(ctx, nodeIP)
 

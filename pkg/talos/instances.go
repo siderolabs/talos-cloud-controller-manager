@@ -56,6 +56,10 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			nodeIP string
 		)
 
+		if err = i.c.refreshClient(ctx); err != nil {
+			return nil, fmt.Errorf("error refreshing client connection: %w", err)
+		}
+
 		for _, ip := range nodeIPs {
 			meta, err = i.c.getNodeMetadata(ctx, ip)
 			if err == nil {
