@@ -1,11 +1,12 @@
 module github.com/siderolabs/talos-cloud-controller-manager
 
 go 1.21.6
+toolchain go1.22.1
 
 require (
 	github.com/cosi-project/runtime v0.3.20
 	github.com/siderolabs/net v0.4.0
-	github.com/siderolabs/talos/pkg/machinery v1.6.4
+	github.com/siderolabs/talos/pkg/machinery v1.6.6
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
 	gopkg.in/yaml.v3 v3.0.1
