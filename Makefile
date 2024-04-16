@@ -85,7 +85,7 @@ unit: ## Unit Tests
 
 .PHONY: conformance
 conformance: ## Conformance
-	docker run --rm -it -v $(PWD):/src -w /src ghcr.io/siderolabs/conform:v0.1.0-alpha.27 enforce
+	docker run --rm -it -v $(PWD):/src -w /src ghcr.io/siderolabs/conform:v0.1.0-alpha.30 enforce
 
 ############
 
