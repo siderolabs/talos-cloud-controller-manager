@@ -11,3 +11,7 @@ data:
   {{- if .Values.features.approveNodeCSR }}
       approveNodeCSR: true
   {{- end }}
+  {{- with .Values.transformations }}
+    transformations:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}

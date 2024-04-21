@@ -29,8 +29,21 @@ func TestReadCloudConfig(t *testing.T) {
 
 	cfg, err := readCloudConfig(strings.NewReader(`
 global:
-    approveNodeCSR: true
-    preferIPv6: true
+  approveNodeCSR: true
+  preferIPv6: true
+transformations:
+- name: cluster
+  nodeSelector:
+  - name: cluter-1
+    matchExpressions:
+    - key: platform
+      operator: In
+      values:
+      - cluter
+    annotations:
+      cluster-platform: "{{ .Platform }}"
+    labels:
+      node-role.kubernetes.io/web: ""
 `))
 	if err != nil {
 		t.Fatalf("Should succeed when a valid config is provided: %s", err)

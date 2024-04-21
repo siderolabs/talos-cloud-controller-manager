@@ -1,6 +1,6 @@
 # talos-cloud-controller-manager
 
-![Version: 0.2.3](https://img.shields.io/badge/Version-0.2.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.0](https://img.shields.io/badge/AppVersion-v1.6.0-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.0](https://img.shields.io/badge/AppVersion-v1.6.0-informational?style=flat-square)
 
 Talos Cloud Controller Manager Helm Chart
 
@@ -79,5 +79,6 @@ helm upgrade -i --namespace=kube-system -f talos-ccm.yaml \
 | serviceAccount.create | bool | `true` | Specifies whether a service account should be created. |
 | serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template. |
 | tolerations | list | `[{"effect":"NoSchedule","key":"node-role.kubernetes.io/control-plane","operator":"Exists"},{"effect":"NoSchedule","key":"node.cloudprovider.kubernetes.io/uninitialized","operator":"Exists"}]` | Tolerations for data pods assignment. ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| transformations | list | `[]` | List of node transformations. Available matchExpressions key values: https://github.com/siderolabs/talos/blob/main/pkg/machinery/resources/runtime/platform_metadata.go#L28 |
 | updateStrategy | object | `{"rollingUpdate":{"maxUnavailable":1},"type":"RollingUpdate"}` | Deployment update stategy type. ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment |
 | useDaemonSet | bool | `false` | Deploy CCM  in Daemonset mode. CCM will use hostNetwork and current node to access kubernetes/talos API You can run it without CNI plugin. |

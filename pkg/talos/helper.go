@@ -3,6 +3,7 @@ package talos
 import (
 	"context"
 	"crypto/x509"
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -12,6 +13,8 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/util/strategicpatch"
 	clientkubernetes "k8s.io/client-go/kubernetes"
 	cloudproviderapi "k8s.io/cloud-provider/api"
 	cloudnodeutil "k8s.io/cloud-provider/node/helpers"
@@ -72,24 +75,79 @@ func getNodeAddresses(config *cloudConfig, platform string, nodeIPs []string, if
 	return addresses
 }
 
-func syncNodeLabels(c *client, node *v1.Node, meta *runtime.PlatformMetadataSpec) error {
-	nodeLabels := node.ObjectMeta.Labels
+func syncNodeAnnotations(ctx context.Context, c *client, node *v1.Node, nodeAnnotations map[string]string) error {
+	nodeAnnotationsOrig := node.ObjectMeta.Labels
+	annotationsToUpdate := map[string]string{}
+
+	for k, v := range nodeAnnotations {
+		if r, ok := nodeAnnotationsOrig[k]; !ok || r != v {
+			annotationsToUpdate[k] = v
+		}
+	}
+
+	if len(annotationsToUpdate) > 0 {
+		oldData, err := json.Marshal(node)
+		if err != nil {
+			return fmt.Errorf("failed to marshal the existing node %#v: %w", node, err)
+		}
+
+		newNode := node.DeepCopy()
+		if newNode.Annotations == nil {
+			newNode.Annotations = make(map[string]string)
+		}
+
+		for k, v := range annotationsToUpdate {
+			newNode.Annotations[k] = v
+		}
+
+		newData, err := json.Marshal(newNode)
+		if err != nil {
+			return fmt.Errorf("failed to marshal the new node %#v: %w", newNode, err)
+		}
+
+		patchBytes, err := strategicpatch.CreateTwoWayMergePatch(oldData, newData, &v1.Node{})
+		if err != nil {
+			return fmt.Errorf("failed to create a two-way merge patch: %v", err)
+		}
+
+		if _, err := c.kclient.CoreV1().Nodes().Patch(ctx, node.Name, types.StrategicMergePatchType, patchBytes, metav1.PatchOptions{}); err != nil {
+			return fmt.Errorf("failed to patch the node: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func setTalosNodeLabels(c *client, meta *runtime.PlatformMetadataSpec) map[string]string {
+	if meta == nil {
+		return make(map[string]string)
+	}
+
+	labels := make(map[string]string, 3)
+
+	if meta.Platform != "" {
+		labels[ClusterNodePlatformLabel] = meta.Platform
+	}
+
+	if meta.Spot {
+		labels[ClusterNodeLifeCycleLabel] = "spot"
+	}
+
+	if clusterName := c.talos.GetClusterName(); clusterName != "" {
+		labels[ClusterNameNodeLabel] = clusterName
+	}
+
+	return labels
+}
+
+func syncNodeLabels(c *client, node *v1.Node, nodeLabels map[string]string) error {
+	nodeLabelsOrig := node.ObjectMeta.Labels
 	labelsToUpdate := map[string]string{}
 
-	if nodeLabels == nil {
-		nodeLabels = map[string]string{}
-	}
-
-	if meta.Platform != "" && nodeLabels[ClusterNodePlatformLabel] != meta.Platform {
-		labelsToUpdate[ClusterNodePlatformLabel] = meta.Platform
-	}
-
-	if meta.Spot && nodeLabels[ClusterNodeLifeCycleLabel] != "spot" {
-		labelsToUpdate[ClusterNodeLifeCycleLabel] = "spot"
-	}
-
-	if clusterName := c.talos.GetClusterName(); clusterName != "" && nodeLabels[ClusterNameNodeLabel] != clusterName {
-		labelsToUpdate[ClusterNameNodeLabel] = clusterName
+	for k, v := range nodeLabels {
+		if r, ok := nodeLabelsOrig[k]; !ok || r != v {
+			labelsToUpdate[k] = v
+		}
 	}
 
 	if len(labelsToUpdate) > 0 {

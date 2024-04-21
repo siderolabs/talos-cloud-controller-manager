@@ -3,8 +3,10 @@ package talos
 import (
 	"context"
 	"fmt"
+	"maps"
 	"strings"
 
+	"github.com/siderolabs/talos-cloud-controller-manager/pkg/transformer"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/net"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/platform"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
@@ -44,6 +46,8 @@ func (i *instances) InstanceShutdown(_ context.Context, node *v1.Node) (bool, er
 // InstanceMetadata returns the instance's metadata. The values returned in InstanceMetadata are
 // translated into specific fields in the Node object on registration.
 // Use the node.name or node.spec.providerID field to find the node in the cloud provider.
+//
+//nolint:gocyclo,cyclop
 func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloudprovider.InstanceMetadata, error) {
 	klog.V(4).Info("instances.InstanceMetadata() called, node: ", node.Name)
 
@@ -90,6 +94,11 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			}
 		}
 
+		nodeSpec, err := transformer.TransformNode(i.c.config.Transformations, meta)
+		if err != nil {
+			return nil, fmt.Errorf("error transforming node: %w", err)
+		}
+
 		ifaces, err := i.c.getNodeIfaces(ctx, nodeIP)
 		if err != nil {
 			return nil, fmt.Errorf("error getting interfaces list from the node %s: %w", node.Name, err)
@@ -112,7 +121,23 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			}, nil
 		}
 
-		if err := syncNodeLabels(i.c, node, meta); err != nil {
+		if nodeSpec != nil && nodeSpec.Annotations != nil {
+			klog.V(4).Infof("instances.InstanceMetadata() node %s has annotations: %+v", node.Name, nodeSpec.Annotations)
+
+			if err := syncNodeAnnotations(ctx, i.c, node, nodeSpec.Annotations); err != nil {
+				klog.Errorf("failed update annotations for node %s, %v", node.Name, err)
+			}
+		}
+
+		nodeLabels := setTalosNodeLabels(i.c, meta)
+
+		if nodeSpec != nil && nodeSpec.Labels != nil {
+			klog.V(4).Infof("instances.InstanceMetadata() node %s has labels: %+v", node.Name, nodeSpec.Labels)
+
+			maps.Copy(nodeLabels, nodeSpec.Labels)
+		}
+
+		if err := syncNodeLabels(i.c, node, nodeLabels); err != nil {
 			klog.Errorf("failed update labels for node %s, %v", node.Name, err)
 		}
 

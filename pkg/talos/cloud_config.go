@@ -7,12 +7,16 @@ import (
 
 	yaml "gopkg.in/yaml.v3"
 
+	"github.com/siderolabs/talos-cloud-controller-manager/pkg/transformer"
+
 	"k8s.io/klog/v2"
 )
 
 type cloudConfig struct {
 	// Global configuration.
 	Global cloudConfigGlobal `yaml:"global,omitempty"`
+	// Node transformation configuration.
+	Transformations []transformer.NodeTerm `yaml:"transformations,omitempty"`
 }
 
 type cloudConfigGlobal struct {

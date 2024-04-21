@@ -4,3 +4,14 @@ global:
   # endpoints:
   #   - 1.2.3.4
   #   - 4.3.2.1
+transformations:
+  - nodeSelector:
+      - matchExpressions:
+          - key: hostname
+            operator: Regexp
+            values:
+              - ^web-.+$
+    annotations:
+      talos.dev/instance-id: "id-{{ .InstanceID }}"
+    labels:
+      node-role.kubernetes.io/web: ""

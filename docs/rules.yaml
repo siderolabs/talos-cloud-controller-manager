@@ -1,0 +1,85 @@
+  # transformation rules for the node
+  transformations:
+    - name: oracle
+      # Match rules similar as kubernetes matchExpressions
+      nodeSelector:
+        - name: oracle vm in frankfurt
+          matchExpressions:
+            - key: platform
+              operator: In
+              values:
+                - oracle
+            - key: region
+              operator: In
+              values:
+                - eu-frankfurt-1
+        # or
+        - name: special vm name
+          matchExpressions:
+            - key: hostname
+              operator: Regexp
+              values:
+                - ^web-oci-ad2-.+$
+
+      # We will annotate and label the nodes
+      annotations:
+        oci.oraclecloud.com/instance-id: "{{ .InstanceID }}"
+        oci.oraclecloud.com/compartment-id: ocid1.compartment.oc1..aaaaaaaabbbbbbccccccdddddd
+      labels:
+        talos.dev/zone": "frankfurt"
+        node-role.kubernetes.io/web: ""
+
+      # Transforme the platformMetadata
+      platformMetadata:
+        zone: EU-FRANKFURT-1-AD-2
+
+    - name: openstack
+      nodeSelector:
+        - name: fix openstack zone
+          matchExpressions:
+            - key: platform
+              operator: In
+              values:
+                - openstack
+            - key: zone
+              operator: In
+              values:
+                - nova
+            - key: hostname
+              operator: Regexp
+              values:
+                - ^web-fra-.+$
+      annotations: {}
+      labels:
+        talos.dev/zone: "frankfurt"
+        node-role.kubernetes.io/web: ""
+
+      # Set providerId/region/zone based on the hostname and platform
+      platformMetadata:
+        zone: frankfurt
+        region: eu-frankfurt-1
+        providerId: openstack://fra/{{ .InstanceID }}
+
+      # Special features for the node
+      features:
+        publicIPPredict: true
+
+---
+# Metadata for the node
+
+# Oracle
+platform: oracle
+hostname: web-oci-ad2-1
+region: eu-frankfurt-1
+zone: EU-FRANKFURT-1-AD-2
+instanceType: VM.Standard.A1.Flex
+instanceId: ocid1.instance.oc1.eu-frankfurt-1.aaaaaaaabbbbbbccccccdddddd
+providerId: oci://ocid1.instance.oc1.eu-frankfurt-1.aaaaaaaabbbbbbccccccdddddd
+
+# Openstack
+platform: openstack
+hostname: web-fra-de11
+zone: nova
+instanceType: b2-7
+instanceId: 9a1fd9ee-9f05-473e-88d8-1b1b1b1b1b1b
+providerId: openstack:///9a1fd9ee-9f05-473e-88d8-1b1b1b1b1b1b

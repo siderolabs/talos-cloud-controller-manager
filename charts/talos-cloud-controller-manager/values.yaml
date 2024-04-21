@@ -40,6 +40,23 @@ features:
   # `approveNodeCSR` - check and approve node CSR.
   approveNodeCSR: true
 
+# -- List of node transformations.
+# Available matchExpressions key values: https://github.com/siderolabs/talos/blob/main/pkg/machinery/resources/runtime/platform_metadata.go#L28
+transformations: []
+  # - name: control-plane region
+  #   nodeSelector:
+  #     - matchExpressions:
+  #         - key: hostname
+  #           operator: Regexp
+  #           values:
+  #             - ^control-.+$
+  #   annotations:
+  #     talos.dev/instance-id: "{{ .InstanceID }}"
+  #   labels:
+  #     talos.dev/instance-spot: "{{ .Spot }}"
+  #   platformMetadata:
+  #     Region: "us-west-2"
+
 # -- Log verbosity level. See https://github.com/kubernetes/community/blob/master/contributors/devel/sig-instrumentation/logging.md
 # for description of individual verbosity levels.
 logVerbosityLevel: 2

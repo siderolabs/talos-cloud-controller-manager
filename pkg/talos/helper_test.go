@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/x509"
 	"fmt"
+	"maps"
 	"net"
 	"net/netip"
 	"strings"
@@ -11,6 +12,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/siderolabs/talos-cloud-controller-manager/pkg/nodeselector"
+	"github.com/siderolabs/talos-cloud-controller-manager/pkg/transformer"
 	"github.com/siderolabs/talos/pkg/machinery/resources/network"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
 
@@ -151,10 +154,30 @@ func TestGetNodeAddresses(t *testing.T) {
 func TestSyncNodeLabels(t *testing.T) {
 	t.Setenv("TALOSCONFIG", "../../hack/talosconfig")
 
-	cfg := cloudConfig{Global: cloudConfigGlobal{
-		ClusterName: "test-cluster",
-		Endpoints:   []string{"127.0.0.1"},
-	}}
+	cfg := cloudConfig{
+		Global: cloudConfigGlobal{
+			ClusterName: "test-cluster",
+			Endpoints:   []string{"127.0.0.1"},
+		},
+		Transformations: []transformer.NodeTerm{
+			{
+				NodeSelector: []nodeselector.NodeSelectorTerm{
+					{
+						MatchExpressions: []nodeselector.NodeSelectorRequirement{
+							{
+								Key:      "Hostname",
+								Operator: "Regexp",
+								Values:   []string{"^web-.+$"},
+							},
+						},
+					},
+				},
+				Labels: map[string]string{
+					"node-role.kubernetes.io/web": "",
+				},
+			},
+		},
+	}
 	ctx := context.Background()
 	nodes := &v1.NodeList{
 		Items: []v1.Node{
@@ -165,6 +188,15 @@ func TestSyncNodeLabels(t *testing.T) {
 				},
 				ObjectMeta: metav1.ObjectMeta{
 					Name: "node1",
+				},
+			},
+			{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "Node",
+					APIVersion: "v1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "web-1",
 				},
 			},
 		},
@@ -258,9 +290,45 @@ func TestSyncNodeLabels(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "node with custom labels",
+			node: &v1.Node{
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "web-1",
+				},
+			},
+			meta: &runtime.PlatformMetadataSpec{
+				Platform: "nocloud",
+				Hostname: "web-1",
+			},
+			expectedError: nil,
+			expectedNode: &v1.Node{
+				TypeMeta: metav1.TypeMeta{
+					Kind:       "Node",
+					APIVersion: "v1",
+				},
+				ObjectMeta: metav1.ObjectMeta{
+					Name: "web-1",
+					Labels: map[string]string{
+						ClusterNameNodeLabel:          "test-cluster",
+						ClusterNodePlatformLabel:      "nocloud",
+						"node-role.kubernetes.io/web": "",
+					},
+				},
+			},
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			err := syncNodeLabels(client, tt.node, tt.meta)
+			nodeSpec, err := transformer.TransformNode(client.config.Transformations, tt.meta)
+			assert.NoError(t, err)
+
+			labels := setTalosNodeLabels(client, tt.meta)
+
+			if nodeSpec != nil && nodeSpec.Labels != nil {
+				maps.Copy(labels, nodeSpec.Labels)
+			}
+
+			err = syncNodeLabels(client, tt.node, labels)
 
 			assert.Equal(t, tt.expectedError, err)
 
