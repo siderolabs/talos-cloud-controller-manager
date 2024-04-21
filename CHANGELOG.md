@@ -1,4 +1,30 @@
 
+<a name="v1.6.0"></a>
+## [v1.6.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.4.0...v1.6.0) (2024-04-21)
+
+Welcome to the v1.6.0 release of Talos CCM!
+
+### Features
+- support CloudDualStackNodeIPs
+- deploy without cni
+- sign images
+
+### Changelog
+
+* 27aa781 chore: bump deps
+* 9d65a90 chore: bump deps
+* 9403bc5 fix: refresh talos tls certs
+* b4e136b feat: support CloudDualStackNodeIPs
+* 670ead7 feat: deploy without cni
+* 33faa60 chore: bump deps
+* 3c9d805 fix: prepend v for image
+* 5d41626 fix: azure providerID
+* eff652f chore: bump deps
+* 214cc87 chore: bump deps
+* 5a1eaf7 chore: bump deps
+* fe5a0b1 chore: bump github actions deps
+* 562e738 feat: sign images
+
 <a name="v1.4.0"></a>
 ## [v1.4.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.3.0...v1.4.0) (2023-05-27)
 
@@ -28,7 +54,7 @@ Welcome to the v1.4.0 release of Talos CCM!
 * d3d613b fix: helm chart namespace
 
 <a name="v1.3.0"></a>
-## v1.3.0 (2022-12-18)
+## v1.3.0 (2022-12-20)
 
 Welcome to the v1.3.0 release of Talos CCM!
 
