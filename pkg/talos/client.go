@@ -47,7 +47,7 @@ func newClient(ctx context.Context, config *cloudConfig) (*client, error) {
 	}, nil
 }
 
-func (c *client) refreshClient(ctx context.Context) error {
+func (c *client) refreshTalosClient(ctx context.Context) error {
 	if _, err := c.talos.Version(ctx); err != nil {
 		talos, err := newClient(ctx, c.config)
 		if err != nil {

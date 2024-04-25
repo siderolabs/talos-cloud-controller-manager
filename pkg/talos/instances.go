@@ -60,7 +60,7 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			nodeIP string
 		)
 
-		if err = i.c.refreshClient(ctx); err != nil {
+		if err = i.c.refreshTalosClient(ctx); err != nil {
 			return nil, fmt.Errorf("error refreshing client connection: %w", err)
 		}
 

@@ -75,7 +75,7 @@ func (c *cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, 
 	c.ctx = ctx
 	c.stop = cancel
 
-	if _, err := c.client.talos.Version(c.ctx); err != nil {
+	if err := c.client.refreshTalosClient(c.ctx); err != nil {
 		klog.Errorf("failed to initialized talos client: %v", err)
 
 		return
