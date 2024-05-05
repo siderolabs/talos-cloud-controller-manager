@@ -143,16 +143,17 @@ linters:
     - errorlint
     - exhaustruct
     - exhaustivestruct
+    - err113
     - forbidigo
     - forcetypeassert
     - funlen
-    - gas
     - gochecknoglobals
     - gochecknoinits
     - gocognit
     - godox
-    - goerr113
     - gomnd
+    - gosec
+    - mnd
     - ifshort
     - ireturn # we return interfaces
     - maintidx
@@ -175,7 +176,6 @@ linters:
 
     # temporarily disabled linters
     - copyloopvar
-    # https://github.com/golangci/golangci-lint/issues/4606
     - intrange
 
     # abandoned linters for which golangci shows the warning that the repo is archived by the owner
@@ -188,6 +188,7 @@ linters:
     - deadcode
     - ifshort
     - perfsprint
+    - execinquery
 
   disable-all: false
   fast: false

@@ -104,7 +104,7 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			return nil, fmt.Errorf("error getting interfaces list from the node %s: %w", node.Name, err)
 		}
 
-		addresses := getNodeAddresses(i.c.config, meta.Platform, nodeIPs, ifaces)
+		addresses := getNodeAddresses(i.c.config, meta.Platform, &nodeSpec.Features, nodeIPs, ifaces)
 
 		addresses = append(addresses, v1.NodeAddress{Type: v1.NodeHostName, Address: node.Name})
 

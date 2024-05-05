@@ -30,6 +30,7 @@ func TestGetNodeAddresses(t *testing.T) {
 		name       string
 		cfg        cloudConfig
 		platform   string
+		features   *transformer.NodeFeaturesFlagSpec
 		providedIP string
 		ifaces     []network.AddressStatusSpec
 		expected   []v1.NodeAddress
@@ -142,9 +143,45 @@ func TestGetNodeAddresses(t *testing.T) {
 				{Type: v1.NodeExternalIP, Address: "2001:1234::1"},
 			},
 		},
+		{
+			name:       "gcp dualstack with public IPs",
+			cfg:        cfg,
+			platform:   "gcp",
+			providedIP: "192.168.0.1,fd15:1:2::192:168:0:1",
+			ifaces: []network.AddressStatusSpec{
+				{Address: netip.MustParsePrefix("192.168.0.1/24")},
+				{Address: netip.MustParsePrefix("fe80::e0b5:71ff:fe24:7e60/64")},
+				{Address: netip.MustParsePrefix("1.2.3.4/24"), LinkName: "external"},
+				{Address: netip.MustParsePrefix("2001:1234::123/64")},
+			},
+			expected: []v1.NodeAddress{
+				{Type: v1.NodeInternalIP, Address: "192.168.0.1"},
+				{Type: v1.NodeInternalIP, Address: "fd15:1:2:0:192:168:0:1"},
+				{Type: v1.NodeExternalIP, Address: "1.2.3.4"},
+			},
+		},
+		{
+			name:       "gcp dualstack with public IPs and featureflag",
+			cfg:        cfg,
+			platform:   "gcp",
+			features:   &transformer.NodeFeaturesFlagSpec{PublicIPDiscovery: true},
+			providedIP: "192.168.0.1,fd15:1:2::192:168:0:1",
+			ifaces: []network.AddressStatusSpec{
+				{Address: netip.MustParsePrefix("192.168.0.1/24")},
+				{Address: netip.MustParsePrefix("fe80::e0b5:71ff:fe24:7e60/64")},
+				{Address: netip.MustParsePrefix("1.2.3.4/24"), LinkName: "external"},
+				{Address: netip.MustParsePrefix("2001:1234::123/64")},
+			},
+			expected: []v1.NodeAddress{
+				{Type: v1.NodeInternalIP, Address: "192.168.0.1"},
+				{Type: v1.NodeInternalIP, Address: "fd15:1:2:0:192:168:0:1"},
+				{Type: v1.NodeExternalIP, Address: "1.2.3.4"},
+				{Type: v1.NodeExternalIP, Address: "2001:1234::123"},
+			},
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			addresses := getNodeAddresses(&tt.cfg, tt.platform, strings.Split(tt.providedIP, ","), tt.ifaces)
+			addresses := getNodeAddresses(&tt.cfg, tt.platform, tt.features, strings.Split(tt.providedIP, ","), tt.ifaces)
 
 			assert.Equal(t, tt.expected, addresses)
 		})

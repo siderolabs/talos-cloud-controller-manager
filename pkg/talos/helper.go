@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/siderolabs/talos-cloud-controller-manager/pkg/transformer"
 	utilsnet "github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/net"
 	"github.com/siderolabs/talos/pkg/machinery/resources/network"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
@@ -21,29 +22,36 @@ import (
 	"k8s.io/utils/strings/slices"
 )
 
-func getNodeAddresses(config *cloudConfig, platform string, nodeIPs []string, ifaces []network.AddressStatusSpec) []v1.NodeAddress {
-	var publicIPv4s, publicIPv6s, publicIPs []string
+func ipDescovery(nodeIPs []string, ifaces []network.AddressStatusSpec) (publicIPv4s, publicIPv6s []string) {
+	for _, iface := range ifaces {
+		if iface.LinkName == "kubespan" || iface.LinkName == "lo" {
+			continue
+		}
 
-	switch platform {
-	case "nocloud", "metal", "openstack":
-		for _, iface := range ifaces {
-			if iface.LinkName == "kubespan" {
+		ip := iface.Address.Addr()
+		if ip.IsGlobalUnicast() && !ip.IsPrivate() {
+			if slices.Contains(nodeIPs, ip.String()) {
 				continue
 			}
 
-			ip := iface.Address.Addr()
-			if ip.IsGlobalUnicast() && !ip.IsPrivate() {
-				if slices.Contains(nodeIPs, ip.String()) {
-					continue
-				}
-
-				if ip.Is6() {
-					publicIPv6s = append(publicIPv6s, ip.String())
-				} else {
-					publicIPv4s = append(publicIPv4s, ip.String())
-				}
+			if ip.Is6() {
+				publicIPv6s = append(publicIPv6s, ip.String())
+			} else {
+				publicIPv4s = append(publicIPv4s, ip.String())
 			}
 		}
+	}
+
+	return publicIPv4s, publicIPv6s
+}
+
+func getNodeAddresses(config *cloudConfig, platform string, features *transformer.NodeFeaturesFlagSpec, nodeIPs []string, ifaces []network.AddressStatusSpec) []v1.NodeAddress {
+	var publicIPv4s, publicIPv6s, publicIPs []string
+
+	switch platform {
+	// Those platforms don't expose public IPs information in metadata
+	case "nocloud", "metal", "openstack", "oracle":
+		publicIPv4s, publicIPv6s = ipDescovery(nodeIPs, ifaces)
 	default:
 		for _, iface := range ifaces {
 			if iface.LinkName == "external" {
@@ -60,6 +68,12 @@ func getNodeAddresses(config *cloudConfig, platform string, nodeIPs []string, if
 				}
 			}
 		}
+	}
+
+	if features != nil && features.PublicIPDiscovery {
+		ipv4, ipv6 := ipDescovery(nodeIPs, ifaces)
+		publicIPv4s = append(publicIPv4s, ipv4...)
+		publicIPv6s = append(publicIPv6s, ipv6...)
 	}
 
 	addresses := []v1.NodeAddress{}

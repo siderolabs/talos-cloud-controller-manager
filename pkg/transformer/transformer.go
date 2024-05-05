@@ -20,12 +20,20 @@ type NodeTerm struct {
 	Annotations      map[string]string               `yaml:"annotations,omitempty"`
 	Labels           map[string]string               `yaml:"labels,omitempty"`
 	PlatformMetadata map[string]string               `yaml:"platformMetadata,omitempty"`
+	Features         NodeFeaturesFlagSpec            `yaml:"features,omitempty"`
 }
 
 // NodeSpec represents the transformed node specifcations.
 type NodeSpec struct {
 	Annotations map[string]string
 	Labels      map[string]string
+	Features    NodeFeaturesFlagSpec
+}
+
+// NodeFeaturesFlagSpec represents the node features flags.
+type NodeFeaturesFlagSpec struct {
+	// PublicIPDiscovery try to find public IP on the node
+	PublicIPDiscovery bool `yaml:"publicIPDiscovery,omitempty"`
 }
 
 var prohibitedPlatformMetadataKeys = []string{"hostname", "platform"}
@@ -34,6 +42,11 @@ var prohibitedPlatformMetadataKeys = []string{"hostname", "platform"}
 func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataSpec) (*NodeSpec, error) {
 	if len(terms) == 0 {
 		return nil, nil
+	}
+
+	node := &NodeSpec{
+		Annotations: make(map[string]string),
+		Labels:      make(map[string]string),
 	}
 
 	metadata := metadataFromStruct(platformMetadata)
@@ -45,11 +58,6 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 		}
 
 		if match {
-			node := &NodeSpec{
-				Annotations: make(map[string]string),
-				Labels:      make(map[string]string),
-			}
-
 			if term.Annotations != nil {
 				for k, v := range term.Annotations {
 					t, err := executeTemplate(v, platformMetadata)
@@ -107,7 +115,7 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 		}
 	}
 
-	return nil, nil
+	return node, nil
 }
 
 func executeTemplate(tmpl string, data interface{}) (string, error) {
