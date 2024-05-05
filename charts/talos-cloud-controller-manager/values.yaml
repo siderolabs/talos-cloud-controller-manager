@@ -105,6 +105,9 @@ service:
   containerPort: 50258
   # -- Additional custom annotations for Service.
   annotations: {}
+    # prometheus.io/scrape: "true"
+    # prometheus.io/scheme: "https"
+    # prometheus.io/port: "50258"
 
 # -- Resource requests and limits.
 # ref: http://kubernetes.io/docs/user-guide/compute-resources/

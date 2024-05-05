@@ -6,6 +6,7 @@ import (
 	"maps"
 	"strings"
 
+	"github.com/siderolabs/talos-cloud-controller-manager/pkg/metrics"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/transformer"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/net"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/platform"
@@ -64,9 +65,11 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			return nil, fmt.Errorf("error refreshing client connection: %w", err)
 		}
 
+		mc := metrics.NewMetricContext(runtime.PlatformMetadataID)
+
 		for _, ip := range nodeIPs {
 			meta, err = i.c.getNodeMetadata(ctx, ip)
-			if err == nil {
+			if mc.ObserveRequest(err) == nil {
 				nodeIP = ip
 
 				break
@@ -99,8 +102,10 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			return nil, fmt.Errorf("error transforming node: %w", err)
 		}
 
+		mc = metrics.NewMetricContext("addresses")
+
 		ifaces, err := i.c.getNodeIfaces(ctx, nodeIP)
-		if err != nil {
+		if mc.ObserveRequest(err) != nil {
 			return nil, fmt.Errorf("error getting interfaces list from the node %s: %w", node.Name, err)
 		}
 

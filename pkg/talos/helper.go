@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/siderolabs/talos-cloud-controller-manager/pkg/metrics"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/transformer"
 	utilsnet "github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/net"
 	"github.com/siderolabs/talos/pkg/machinery/resources/network"
@@ -193,10 +194,14 @@ func csrNodeChecks(ctx context.Context, kclient clientkubernetes.Interface, x509
 
 		for _, ip := range x509cr.IPAddresses {
 			if !slices.Contains(nodeAddrs, ip.String()) {
+				metrics.CSRApprovedCount(metrics.ApprovalStatusDeny)
+
 				return false, fmt.Errorf("csrNodeChecks: CSR %s Node IP addresses don't match corresponding "+
 					"Node IP addresses %q, got %q", x509cr.DNSNames[0], nodeAddrs, ip)
 			}
 		}
+
+		metrics.CSRApprovedCount(metrics.ApprovalStatusApprove)
 
 		return true, nil
 	}
