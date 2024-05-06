@@ -11,10 +11,6 @@ func TestReadCloudConfigEmpty(t *testing.T) {
 		t.Errorf("Should not fail when no config is provided: %s", err)
 	}
 
-	if len(cfg.Global.Endpoints) != 0 {
-		t.Errorf("incorrect endpoints: %s", cfg.Global.Endpoints)
-	}
-
 	if cfg.Global.PreferIPv6 {
 		t.Errorf("%v is not default value of preferIPv6", cfg.Global.PreferIPv6)
 	}
@@ -47,10 +43,6 @@ transformations:
 `))
 	if err != nil {
 		t.Fatalf("Should succeed when a valid config is provided: %s", err)
-	}
-
-	if len(cfg.Global.Endpoints) != 2 {
-		t.Errorf("incorrect endpoints: %s", cfg.Global.Endpoints)
 	}
 
 	if !cfg.Global.PreferIPv6 {

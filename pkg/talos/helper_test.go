@@ -196,7 +196,6 @@ func TestSyncNodeLabels(t *testing.T) {
 	cfg := cloudConfig{
 		Global: cloudConfigGlobal{
 			ClusterName: "test-cluster",
-			Endpoints:   []string{"127.0.0.1"},
 		},
 		Transformations: []transformer.NodeTerm{
 			{

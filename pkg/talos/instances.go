@@ -61,14 +61,10 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			nodeIP string
 		)
 
-		if err = i.c.refreshTalosClient(ctx); err != nil {
-			return nil, fmt.Errorf("error refreshing client connection: %w", err)
-		}
-
 		mc := metrics.NewMetricContext(runtime.PlatformMetadataID)
 
 		for _, ip := range nodeIPs {
-			meta, err = i.c.getNodeMetadata(ctx, ip)
+			meta, err = i.c.talos.GetNodeMetadata(ctx, ip)
 			if mc.ObserveRequest(err) == nil {
 				nodeIP = ip
 
@@ -110,7 +106,7 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 
 		mc = metrics.NewMetricContext("addresses")
 
-		ifaces, err := i.c.getNodeIfaces(ctx, nodeIP)
+		ifaces, err := i.c.talos.GetNodeIfaces(ctx, nodeIP)
 		if mc.ObserveRequest(err) != nil {
 			return nil, fmt.Errorf("error getting interfaces list from the node %s: %w", node.Name, err)
 		}
