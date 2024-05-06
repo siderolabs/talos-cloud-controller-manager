@@ -8,7 +8,6 @@ import (
 
 func config() cloudConfig {
 	cfg := cloudConfig{}
-	cfg.Global.Endpoints = []string{"127.0.0.1"}
 
 	return cfg
 }

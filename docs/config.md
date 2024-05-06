@@ -61,12 +61,6 @@ global:
   # Parameter is optional, by default is "false"
   approveNodeCSR: true
 
-  # The list of endpoints to connect to the Talos API (control-plane)
-  # Parameter is optional, by default the controller will discover the control-plane endpoint
-  endpoints:
-    - 1.2.3.4
-    - 4.3.2.1
-
 # Transformations rules for nodes
 transformations:
   # All rules are applied in order, all matched rules are applied to the node

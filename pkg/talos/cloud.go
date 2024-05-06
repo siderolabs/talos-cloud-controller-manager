@@ -1,12 +1,15 @@
-// Package talos does something.
+// Package talos is an implementation of Interface and InstancesV2 for Talos.
 package talos
 
 import (
 	"context"
+	"fmt"
 	"io"
 
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/certificatesigningrequest"
+	"github.com/siderolabs/talos-cloud-controller-manager/pkg/talosclient"
 
+	clientkubernetes "k8s.io/client-go/kubernetes"
 	cloudprovider "k8s.io/cloud-provider"
 	"k8s.io/klog/v2"
 )
@@ -25,14 +28,21 @@ const (
 	ClusterNodeLifeCycleLabel = "node.cloudprovider.kubernetes.io/lifecycle"
 )
 
-type cloud struct {
-	cfg           *cloudConfig
-	client        *client
+// Cloud is an implementation of cloudprovider interface for Talos CCM.
+type Cloud struct {
+	client *client
+
 	instancesV2   cloudprovider.InstancesV2
 	csrController *certificatesigningrequest.Reconciler
 
 	ctx  context.Context //nolint:containedctx
 	stop func()
+}
+
+type client struct {
+	config  *cloudConfig
+	talos   *talosclient.Client
+	kclient clientkubernetes.Interface
 }
 
 func init() {
@@ -56,17 +66,32 @@ func newCloud(config *cloudConfig) (cloudprovider.Interface, error) {
 
 	instancesInterface := newInstances(client)
 
-	return &cloud{
-		cfg:         config,
+	return &Cloud{
 		client:      client,
 		instancesV2: instancesInterface,
+	}, nil
+}
+
+func newClient(ctx context.Context, config *cloudConfig) (*client, error) {
+	if config == nil {
+		return nil, fmt.Errorf("talos cloudConfig is nil")
+	}
+
+	talos, err := talosclient.New(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return &client{
+		config: config,
+		talos:  talos,
 	}, nil
 }
 
 // Initialize provides the cloud with a kubernetes client builder and may spawn goroutines
 // to perform housekeeping or run custom controllers specific to the cloud provider.
 // Any tasks started here should be cleaned up when the stop channel closes.
-func (c *cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, stop <-chan struct{}) {
+func (c *Cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, stop <-chan struct{}) {
 	c.client.kclient = clientBuilder.ClientOrDie(ServiceAccountName)
 
 	klog.InfoS("clientset initialized")
@@ -75,21 +100,15 @@ func (c *cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, 
 	c.ctx = ctx
 	c.stop = cancel
 
-	if err := c.client.refreshTalosClient(c.ctx); err != nil {
-		klog.ErrorS(err, "failed to initialized talos client")
-
-		return
-	}
-
 	// Broadcast the upstream stop signal to all provider-level goroutines
 	// watching the provider's context for cancellation.
-	go func(provider *cloud) {
+	go func(provider *Cloud) {
 		<-stop
 		klog.V(3).InfoS("received cloud provider termination signal")
 		provider.stop()
 	}(c)
 
-	if c.cfg.Global.ApproveNodeCSR {
+	if c.client.config.Global.ApproveNodeCSR {
 		klog.InfoS("Started CSR Node controller")
 
 		c.csrController = certificatesigningrequest.NewCsrController(c.client.kclient, csrNodeChecks)
@@ -101,13 +120,13 @@ func (c *cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, 
 
 // LoadBalancer returns a balancer interface.
 // Also returns true if the interface is supported, false otherwise.
-func (c *cloud) LoadBalancer() (cloudprovider.LoadBalancer, bool) {
+func (c *Cloud) LoadBalancer() (cloudprovider.LoadBalancer, bool) {
 	return nil, false
 }
 
 // Instances returns an instances interface.
 // Also returns true if the interface is supported, false otherwise.
-func (c *cloud) Instances() (cloudprovider.Instances, bool) {
+func (c *Cloud) Instances() (cloudprovider.Instances, bool) {
 	return nil, false
 }
 
@@ -115,32 +134,32 @@ func (c *cloud) Instances() (cloudprovider.Instances, bool) {
 // Implementing InstancesV2 is behaviorally identical to Instances but is optimized to significantly reduce
 // API calls to the cloud provider when registering and syncing nodes.
 // Also returns true if the interface is supported, false otherwise.
-func (c *cloud) InstancesV2() (cloudprovider.InstancesV2, bool) {
+func (c *Cloud) InstancesV2() (cloudprovider.InstancesV2, bool) {
 	return c.instancesV2, c.instancesV2 != nil
 }
 
 // Zones returns a zones interface.
 // Also returns true if the interface is supported, false otherwise.
-func (c *cloud) Zones() (cloudprovider.Zones, bool) {
+func (c *Cloud) Zones() (cloudprovider.Zones, bool) {
 	return nil, false
 }
 
 // Clusters is not implemented.
-func (c *cloud) Clusters() (cloudprovider.Clusters, bool) {
+func (c *Cloud) Clusters() (cloudprovider.Clusters, bool) {
 	return nil, false
 }
 
 // Routes is not implemented.
-func (c *cloud) Routes() (cloudprovider.Routes, bool) {
+func (c *Cloud) Routes() (cloudprovider.Routes, bool) {
 	return nil, false
 }
 
 // ProviderName returns the cloud provider ID.
-func (c *cloud) ProviderName() string {
+func (c *Cloud) ProviderName() string {
 	return ProviderName
 }
 
 // HasClusterID is not implemented.
-func (c *cloud) HasClusterID() bool {
+func (c *Cloud) HasClusterID() bool {
 	return true
 }
