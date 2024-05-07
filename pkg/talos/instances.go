@@ -97,8 +97,10 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			}
 		}
 
+		mct := metrics.NewMetricContext("metadata")
+
 		nodeSpec, err := transformer.TransformNode(i.c.config.Transformations, meta)
-		if err != nil {
+		if mct.ObserveTransformer(err) != nil {
 			return nil, fmt.Errorf("error transforming node: %w", err)
 		}
 

@@ -137,8 +137,10 @@ func TestMatch(t *testing.T) {
 			terms: []transformer.NodeTerm{
 				{
 					Name: "my-transformer",
+					Labels: map[string]string{
+						"karpenter.sh/capacity-type": "{{ if .Spot }}spot{{ else }}on-demand{{ end }}",
+					},
 					PlatformMetadata: map[string]string{
-						"Spot": "true",
 						"Zone": "us-west1",
 					},
 				},
@@ -146,10 +148,13 @@ func TestMatch(t *testing.T) {
 			metadata: runtime.PlatformMetadataSpec{
 				Platform: "test-platform",
 				Hostname: "test-hostname",
+				Spot:     true,
 			},
 			expected: &transformer.NodeSpec{
 				Annotations: map[string]string{},
-				Labels:      map[string]string{},
+				Labels: map[string]string{
+					"karpenter.sh/capacity-type": "spot",
+				},
 			},
 			expectedMeta: &runtime.PlatformMetadataSpec{
 				Platform: "test-platform",
@@ -164,10 +169,49 @@ func TestMatch(t *testing.T) {
 				{
 					Name: "my-transformer",
 					PlatformMetadata: map[string]string{
-						"Hostname": "fake-hostname",
-						"spot":     "true",
-						"zoNe":     "us-west1",
-						"wrong":    "value",
+						"Hostname":     "fake-hostname",
+						"spot":         "true",
+						"zoNe":         "us-west1",
+						"wrong":        "value",
+						"InstanceType": `{{ regexFindString "^type-([a-z0-9]+)-(.*)$" .Hostname 1 }}`,
+					},
+				},
+			},
+			metadata: runtime.PlatformMetadataSpec{
+				Platform: "test-platform",
+				Hostname: "type-c1m5-hostname",
+			},
+			expected: &transformer.NodeSpec{
+				Annotations: map[string]string{},
+				Labels:      map[string]string{},
+			},
+			expectedMeta: &runtime.PlatformMetadataSpec{
+				Platform:     "test-platform",
+				Hostname:     "type-c1m5-hostname",
+				Spot:         true,
+				Zone:         "us-west1",
+				InstanceType: "c1m5",
+			},
+		},
+		{
+			name: "Multiple transformers",
+			terms: []transformer.NodeTerm{
+				{
+					Name: "first-rule",
+					Annotations: map[string]string{
+						"first-annotation": "first-value",
+					},
+					Labels: map[string]string{
+						"karpenter.sh/capacity-type": "on-demand",
+					},
+				},
+				{
+					Name: "second-rule",
+					Labels: map[string]string{
+						"karpenter.sh/capacity-type": "spot",
+					},
+					PlatformMetadata: map[string]string{
+						"Zone": "us-west1",
 					},
 				},
 			},
@@ -176,13 +220,16 @@ func TestMatch(t *testing.T) {
 				Hostname: "test-hostname",
 			},
 			expected: &transformer.NodeSpec{
-				Annotations: map[string]string{},
-				Labels:      map[string]string{},
+				Annotations: map[string]string{
+					"first-annotation": "first-value",
+				},
+				Labels: map[string]string{
+					"karpenter.sh/capacity-type": "spot",
+				},
 			},
 			expectedMeta: &runtime.PlatformMetadataSpec{
 				Platform: "test-platform",
 				Hostname: "test-hostname",
-				Spot:     true,
 				Zone:     "us-west1",
 			},
 		},

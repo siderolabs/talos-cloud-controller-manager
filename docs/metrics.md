@@ -74,3 +74,23 @@ Example output:
 ```txt
 talosccm_csr_approval_count{status="approve"} 2
 ```
+
+### Transformer rules calls
+
+|Metric name|Metric type|Labels/tags|
+|-----------|-----------|-----------|
+|talosccm_transformer_duration_seconds|Histogram|`type`=<type_transformation>|
+|talosccm_transformer_errors_total|Counter|`type`=<type_transformation>|
+
+Example output:
+
+```txt
+talosccm_transformer_duration_seconds_bucket{type="metadata",le="0.001"} 16
+talosccm_transformer_duration_seconds_bucket{type="metadata",le="0.01"} 16
+talosccm_transformer_duration_seconds_bucket{type="metadata",le="0.05"} 16
+talosccm_transformer_duration_seconds_bucket{type="metadata",le="0.1"} 16
+talosccm_transformer_duration_seconds_bucket{type="metadata",le="+Inf"} 16
+talosccm_transformer_duration_seconds_sum{type="metadata"} 0.0012434149999999999
+talosccm_transformer_duration_seconds_count{type="metadata"} 16
+talosccm_transformer_errors_total{type="metadata"} 6
+```

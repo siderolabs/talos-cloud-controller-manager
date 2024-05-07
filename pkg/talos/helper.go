@@ -10,6 +10,7 @@ import (
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/metrics"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/transformer"
 	utilsnet "github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/net"
+	"github.com/siderolabs/talos/pkg/machinery/constants"
 	"github.com/siderolabs/talos/pkg/machinery/resources/network"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
 
@@ -23,9 +24,12 @@ import (
 	"k8s.io/utils/strings/slices"
 )
 
-func ipDescovery(nodeIPs []string, ifaces []network.AddressStatusSpec) (publicIPv4s, publicIPv6s []string) {
+func ipDiscovery(nodeIPs []string, ifaces []network.AddressStatusSpec) (publicIPv4s, publicIPv6s []string) {
 	for _, iface := range ifaces {
-		if iface.LinkName == "kubespan" || iface.LinkName == "lo" {
+		if iface.LinkName == constants.KubeSpanLinkName ||
+			iface.LinkName == constants.SideroLinkName ||
+			iface.LinkName == "lo" ||
+			strings.HasPrefix(iface.LinkName, "dummy") {
 			continue
 		}
 
@@ -52,7 +56,7 @@ func getNodeAddresses(config *cloudConfig, platform string, features *transforme
 	switch platform {
 	// Those platforms don't expose public IPs information in metadata
 	case "nocloud", "metal", "openstack", "oracle":
-		publicIPv4s, publicIPv6s = ipDescovery(nodeIPs, ifaces)
+		publicIPv4s, publicIPv6s = ipDiscovery(nodeIPs, ifaces)
 	default:
 		for _, iface := range ifaces {
 			if iface.LinkName == "external" {
@@ -72,7 +76,7 @@ func getNodeAddresses(config *cloudConfig, platform string, features *transforme
 	}
 
 	if features != nil && features.PublicIPDiscovery {
-		ipv4, ipv6 := ipDescovery(nodeIPs, ifaces)
+		ipv4, ipv6 := ipDiscovery(nodeIPs, ifaces)
 		publicIPv4s = append(publicIPv4s, ipv4...)
 		publicIPv6s = append(publicIPv6s, ipv6...)
 	}

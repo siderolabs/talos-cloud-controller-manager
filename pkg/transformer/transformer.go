@@ -110,8 +110,6 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 					}
 				}
 			}
-
-			return node, nil
 		}
 	}
 
@@ -119,7 +117,7 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 }
 
 func executeTemplate(tmpl string, data interface{}) (string, error) {
-	t, err := template.New("transformer").Parse(tmpl)
+	t, err := template.New("transformer").Funcs(GenericFuncMap()).Parse(tmpl)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse template %q: %w", tmpl, err)
 	}
