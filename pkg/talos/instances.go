@@ -84,14 +84,14 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 
 		klog.V(5).Infof("instances.InstanceMetadata() resource: %+v", meta)
 
-		providerID := meta.ProviderID
-		if providerID == "" {
-			providerID = fmt.Sprintf("%s://%s/%s", ProviderName, meta.Platform, nodeIP)
+		if meta.ProviderID == "" {
+			meta.ProviderID = fmt.Sprintf("%s://%s/%s", ProviderName, meta.Platform, nodeIP)
 		}
 
 		// Fix for Azure, resource group name must be lower case.
+		// Since Talos 1.8 fixed it, we can remove this code in the future.
 		if meta.Platform == "azure" {
-			providerID, err = platform.AzureConvertResourceGroupNameToLower(providerID)
+			meta.ProviderID, err = platform.AzureConvertResourceGroupNameToLower(meta.ProviderID)
 			if err != nil {
 				return nil, fmt.Errorf("error converting resource group name to lower case: %w", err)
 			}
@@ -149,7 +149,7 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 		}
 
 		return &cloudprovider.InstanceMetadata{
-			ProviderID:    providerID,
+			ProviderID:    meta.ProviderID,
 			InstanceType:  meta.InstanceType,
 			NodeAddresses: addresses,
 			Zone:          meta.Zone,

@@ -11,6 +11,8 @@ import (
 
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/nodeselector"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
+
+	"k8s.io/apimachinery/pkg/util/validation"
 )
 
 // NodeTerm represents expressions and fields to transform node metadata.
@@ -39,6 +41,8 @@ type NodeFeaturesFlagSpec struct {
 var prohibitedPlatformMetadataKeys = []string{"hostname", "platform"}
 
 // TransformNode transforms the node metadata based on the node transformation rules.
+//
+//nolint:gocyclo,cyclop
 func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataSpec) (*NodeSpec, error) {
 	if len(terms) == 0 {
 		return nil, nil
@@ -65,6 +69,10 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 						return nil, fmt.Errorf("failed to transformer annotation '%q': %w", k, err)
 					}
 
+					if errs := validation.IsQualifiedName(k); len(errs) != 0 {
+						return nil, fmt.Errorf("invalid annotation name %q: %v", k, errs)
+					}
+
 					node.Annotations[k] = t
 				}
 			}
@@ -74,6 +82,14 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 					t, err := executeTemplate(v, platformMetadata)
 					if err != nil {
 						return nil, fmt.Errorf("failed to transformer label '%s': %w", k, err)
+					}
+
+					if errs := validation.IsQualifiedName(k); len(errs) != 0 {
+						return nil, fmt.Errorf("invalid label name %q: %v", k, errs)
+					}
+
+					if errs := validation.IsValidLabelValue(t); len(errs) != 0 {
+						return nil, fmt.Errorf("invalid label value %q: %v", t, errs)
 					}
 
 					node.Labels[k] = t

@@ -117,7 +117,7 @@ func TestMatch(t *testing.T) {
 				{
 					Name: "my-transformer",
 					Labels: map[string]string{
-						"label-template": "my-value-{{ .Spot }}-{{ .Zone }}",
+						"label-template": "my-value-{{ .Spot }}-{{ .Zone }}a",
 					},
 				},
 			},
@@ -128,7 +128,7 @@ func TestMatch(t *testing.T) {
 			expected: &transformer.NodeSpec{
 				Annotations: map[string]string{},
 				Labels: map[string]string{
-					"label-template": "my-value-false-",
+					"label-template": "my-value-false-a",
 				},
 			},
 		},
@@ -232,6 +232,22 @@ func TestMatch(t *testing.T) {
 				Hostname: "test-hostname",
 				Zone:     "us-west1",
 			},
+		},
+		{
+			name: "Transform labels with bad label name",
+			terms: []transformer.NodeTerm{
+				{
+					Name: "my-transformer",
+					Labels: map[string]string{
+						"-template": "my-value",
+					},
+				},
+			},
+			metadata: runtime.PlatformMetadataSpec{
+				Platform: "test-platform",
+				Hostname: "test-hostname",
+			},
+			expectedError: fmt.Errorf("invalid label name \"-template\": [name part must consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character (e.g. 'MyName',  or 'my.name',  or '123-abc', regex used for validation is '([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]')]"), //nolint:lll
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
