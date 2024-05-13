@@ -44,13 +44,13 @@ var prohibitedPlatformMetadataKeys = []string{"hostname", "platform"}
 //
 //nolint:gocyclo,cyclop
 func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataSpec) (*NodeSpec, error) {
-	if len(terms) == 0 {
-		return nil, nil
-	}
-
 	node := &NodeSpec{
 		Annotations: make(map[string]string),
 		Labels:      make(map[string]string),
+	}
+
+	if len(terms) == 0 {
+		return node, nil
 	}
 
 	metadata := metadataFromStruct(platformMetadata)

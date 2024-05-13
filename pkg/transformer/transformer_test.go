@@ -26,6 +26,10 @@ func TestMatch(t *testing.T) {
 				Platform: "test-platform",
 				Hostname: "test-hostname",
 			},
+			expected: &transformer.NodeSpec{
+				Annotations: map[string]string{},
+				Labels:      map[string]string{},
+			},
 		},
 		{
 			name: "Transform labels",
