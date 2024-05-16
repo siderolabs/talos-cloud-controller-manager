@@ -26,8 +26,6 @@ type cloudConfigGlobal struct {
 	ClusterName string `yaml:"clusterName,omitempty"`
 	// Talos API endpoints.
 	Endpoints []string `yaml:"endpoints,omitempty"`
-	// Do not update foreign initialized node.
-	SkipForeignNode bool `yaml:"skipForeignNode,omitempty"`
 	// Prefer IPv6.
 	PreferIPv6 bool `yaml:"preferIPv6,omitempty"`
 }

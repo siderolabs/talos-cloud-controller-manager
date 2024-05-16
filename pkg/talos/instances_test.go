@@ -41,7 +41,6 @@ func TestInstanceMetadata(t *testing.T) {
 	t.Setenv("TALOSCONFIG", "../../hack/talosconfig")
 
 	cfg := cloudConfig{}
-	cfg.Global.SkipForeignNode = true
 
 	ctx := context.Background()
 	client, err := newClient(ctx, &cfg)

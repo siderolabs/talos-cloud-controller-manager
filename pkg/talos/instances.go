@@ -104,6 +104,10 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			return nil, fmt.Errorf("error transforming node: %w", err)
 		}
 
+		if nodeSpec == nil {
+			nodeSpec = &transformer.NodeSpec{}
+		}
+
 		mc = metrics.NewMetricContext("addresses")
 
 		ifaces, err := i.c.getNodeIfaces(ctx, nodeIP)
@@ -119,16 +123,7 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			addresses = append(addresses, v1.NodeAddress{Type: v1.NodeInternalDNS, Address: meta.Hostname})
 		}
 
-		// Foreign node, update network only.
-		if i.c.config.Global.SkipForeignNode && !strings.HasPrefix(node.Spec.ProviderID, ProviderName) {
-			klog.V(4).Infof("instances.InstanceMetadata() node %s has foreign providerID: %s, skipped", node.Name, node.Spec.ProviderID)
-
-			return &cloudprovider.InstanceMetadata{
-				NodeAddresses: addresses,
-			}, nil
-		}
-
-		if nodeSpec != nil && nodeSpec.Annotations != nil {
+		if nodeSpec.Annotations != nil {
 			klog.V(4).Infof("instances.InstanceMetadata() node %s has annotations: %+v", node.Name, nodeSpec.Annotations)
 
 			if err := syncNodeAnnotations(ctx, i.c, node, nodeSpec.Annotations); err != nil {
@@ -138,7 +133,7 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 
 		nodeLabels := setTalosNodeLabels(i.c, meta)
 
-		if nodeSpec != nil && nodeSpec.Labels != nil {
+		if nodeSpec.Labels != nil {
 			klog.V(4).Infof("instances.InstanceMetadata() node %s has labels: %+v", node.Name, nodeSpec.Labels)
 
 			maps.Copy(nodeLabels, nodeSpec.Labels)

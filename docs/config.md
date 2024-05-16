@@ -61,10 +61,6 @@ global:
   # Parameter is optional, by default is "false"
   approveNodeCSR: true
 
-  # Skip non-Talos nodes after initialisation
-  # Parameter is optional, by default is "false"
-  skipForeignNode: false
-
   # The list of endpoints to connect to the Talos API (control-plane)
   # Parameter is optional, by default the controller will discover the control-plane endpoint
   endpoints:
