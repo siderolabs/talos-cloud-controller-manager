@@ -41,6 +41,7 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
       {{- end }}
+      priorityClassName: {{ default  "system-cluster-critical" .Values.priorityClassName }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:

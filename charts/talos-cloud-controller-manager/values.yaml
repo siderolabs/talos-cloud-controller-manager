@@ -73,7 +73,7 @@ serviceAccount:
   name: ""
 
 # -- CCM pods' priorityClassName.
-priorityClassName: system-cluster-critical
+priorityClassName: ""
 
 # -- Annotations for data pods.
 # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
