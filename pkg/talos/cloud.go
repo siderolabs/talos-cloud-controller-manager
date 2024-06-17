@@ -39,7 +39,7 @@ func init() {
 	cloudprovider.RegisterCloudProvider(ProviderName, func(config io.Reader) (cloudprovider.Interface, error) {
 		cfg, err := readCloudConfig(config)
 		if err != nil {
-			klog.Errorf("failed to read config: %v", err)
+			klog.ErrorS(err, "failed to read config")
 
 			return nil, err
 		}
@@ -69,14 +69,14 @@ func newCloud(config *cloudConfig) (cloudprovider.Interface, error) {
 func (c *cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, stop <-chan struct{}) {
 	c.client.kclient = clientBuilder.ClientOrDie(ServiceAccountName)
 
-	klog.Infof("clientset initialized")
+	klog.InfoS("clientset initialized")
 
 	ctx, cancel := context.WithCancel(context.Background())
 	c.ctx = ctx
 	c.stop = cancel
 
 	if err := c.client.refreshTalosClient(c.ctx); err != nil {
-		klog.Errorf("failed to initialized talos client: %v", err)
+		klog.ErrorS(err, "failed to initialized talos client")
 
 		return
 	}
@@ -85,18 +85,18 @@ func (c *cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, 
 	// watching the provider's context for cancellation.
 	go func(provider *cloud) {
 		<-stop
-		klog.V(3).Infof("received cloud provider termination signal")
+		klog.V(3).InfoS("received cloud provider termination signal")
 		provider.stop()
 	}(c)
 
 	if c.cfg.Global.ApproveNodeCSR {
-		klog.Infof("Started CSR Node controller")
+		klog.InfoS("Started CSR Node controller")
 
 		c.csrController = certificatesigningrequest.NewCsrController(c.client.kclient, csrNodeChecks)
 		go c.csrController.Run(c.ctx)
 	}
 
-	klog.Infof("talos initialized")
+	klog.InfoS("talos initialized")
 }
 
 // LoadBalancer returns a balancer interface.

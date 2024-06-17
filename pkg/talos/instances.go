@@ -31,7 +31,7 @@ func newInstances(client *client) *instances {
 // InstanceExists returns true if the instance for the given node exists according to the cloud provider.
 // Use the node.name or node.spec.providerID field to find the node in the cloud provider.
 func (i *instances) InstanceExists(_ context.Context, node *v1.Node) (bool, error) {
-	klog.V(4).Info("instances.InstanceExists() called node: ", node.Name)
+	klog.V(4).InfoS("instances.InstanceExists() called", "node", klog.KRef("", node.Name))
 
 	return true, nil
 }
@@ -39,7 +39,7 @@ func (i *instances) InstanceExists(_ context.Context, node *v1.Node) (bool, erro
 // InstanceShutdown returns true if the instance is shutdown according to the cloud provider.
 // Use the node.name or node.spec.providerID field to find the node in the cloud provider.
 func (i *instances) InstanceShutdown(_ context.Context, node *v1.Node) (bool, error) {
-	klog.V(4).Info("instances.InstanceShutdown() called, node: ", node.Name)
+	klog.V(4).InfoS("instances.InstanceShutdown() called", "node", klog.KRef("", node.Name))
 
 	return false, nil
 }
@@ -50,7 +50,7 @@ func (i *instances) InstanceShutdown(_ context.Context, node *v1.Node) (bool, er
 //
 //nolint:gocyclo,cyclop
 func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloudprovider.InstanceMetadata, error) {
-	klog.V(4).Info("instances.InstanceMetadata() called, node: ", node.Name)
+	klog.V(4).InfoS("instances.InstanceMetadata() called", "node", klog.KRef("", node.Name))
 
 	if providedIP, ok := node.ObjectMeta.Annotations[cloudproviderapi.AnnotationAlphaProvidedIPAddr]; ok {
 		nodeIPs := net.PreferedDualStackNodeIPs(i.c.config.Global.PreferIPv6, strings.Split(providedIP, ","))
@@ -75,14 +75,14 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 				break
 			}
 
-			klog.Errorf("error getting metadata from the node %s: %v", node.Name, err)
+			klog.ErrorS(err, "error getting metadata from the node", "node", klog.KRef("", node.Name))
 		}
 
 		if meta == nil {
 			return nil, fmt.Errorf("error getting metadata from the node %s", node.Name)
 		}
 
-		klog.V(5).Infof("instances.InstanceMetadata() resource: %+v", meta)
+		klog.V(5).InfoS("instances.InstanceMetadata()", "node", klog.KRef("", node.Name), "resource", meta)
 
 		if meta.ProviderID == "" {
 			meta.ProviderID = fmt.Sprintf("%s://%s/%s", ProviderName, meta.Platform, nodeIP)
@@ -124,23 +124,23 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 		}
 
 		if nodeSpec.Annotations != nil {
-			klog.V(4).Infof("instances.InstanceMetadata() node %s has annotations: %+v", node.Name, nodeSpec.Annotations)
+			klog.V(4).InfoS("instances.InstanceMetadata() node has annotations", "node", klog.KRef("", node.Name), "annotations", nodeSpec.Annotations)
 
 			if err := syncNodeAnnotations(ctx, i.c, node, nodeSpec.Annotations); err != nil {
-				klog.Errorf("failed update annotations for node %s, %v", node.Name, err)
+				klog.ErrorS(err, "error updating annotations for the node", "node", klog.KRef("", node.Name))
 			}
 		}
 
 		nodeLabels := setTalosNodeLabels(i.c, meta)
 
 		if nodeSpec.Labels != nil {
-			klog.V(4).Infof("instances.InstanceMetadata() node %s has labels: %+v", node.Name, nodeSpec.Labels)
+			klog.V(4).InfoS("instances.InstanceMetadata() node has labels", "node", klog.KRef("", node.Name), "labels", nodeSpec.Labels)
 
 			maps.Copy(nodeLabels, nodeSpec.Labels)
 		}
 
 		if err := syncNodeLabels(i.c, node, nodeLabels); err != nil {
-			klog.Errorf("failed update labels for node %s, %v", node.Name, err)
+			klog.ErrorS(err, "error updating labels for the node", "node", klog.KRef("", node.Name))
 		}
 
 		return &cloudprovider.InstanceMetadata{
@@ -152,7 +152,7 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 		}, nil
 	}
 
-	klog.Warningf("instances.InstanceMetadata() is kubelet has --cloud-provider=external on the node %s?", node.Name)
+	klog.InfoS("instances.InstanceMetadata() is kubelet has args: --cloud-provider=external on the node?", node, klog.KRef("", node.Name))
 
 	return &cloudprovider.InstanceMetadata{}, nil
 }

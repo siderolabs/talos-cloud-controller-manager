@@ -48,7 +48,7 @@ func (r *Reconciler) Run(ctx context.Context) {
 				TimeoutSeconds: &watchTimeoutSeconds, // Default timeout: 20 minutes.
 			})
 		if err != nil {
-			klog.Errorf("CertificateSigningRequestReconciler: failed to list CSR resources: %v", err)
+			klog.ErrorS(err, "CertificateSigningRequestReconciler: failed to list CSR resources")
 			time.Sleep(10 * time.Second) // Pause for a while before retrying, otherwise we'll spam error logs.
 
 			continue
@@ -66,41 +66,41 @@ func (r *Reconciler) Run(ctx context.Context) {
 		for {
 			select {
 			case <-ctx.Done():
-				klog.V(4).Infof("CertificateSigningRequestReconciler: context canceled, terminating")
+				klog.V(4).InfoS("CertificateSigningRequestReconciler: context canceled, terminating")
 
 				return
 
 			case event, ok := <-csrWatcher.ResultChan():
 				if !ok {
 					// Server timeout closed the watcher channel, loop again to re-create a new one.
-					klog.V(5).Infof("CertificateSigningRequestReconciler: API server closed watcher channel")
+					klog.V(5).InfoS("CertificateSigningRequestReconciler: API server closed watcher channel")
 
 					break watch
 				}
 
 				csr, ok := event.Object.DeepCopyObject().(*certificatesv1.CertificateSigningRequest)
 				if !ok {
-					klog.Errorf("CertificateSigningRequestReconciler: expected event of type *CertificateSigningRequest, got %v",
-						event.Object.GetObjectKind())
+					klog.ErrorS(err, "CertificateSigningRequestReconciler: expected event of type *CertificateSigningRequest",
+						"kind", event.Object.GetObjectKind())
 
 					continue
 				}
 
 				valid, err := r.Reconcile(ctx, csr)
 				if err != nil {
-					klog.Errorf("CertificateSigningRequestReconciler: failed to reconcile CSR %s: %v", csr.Name, err)
+					klog.ErrorS(err, "CertificateSigningRequestReconciler: failed to reconcile CSR", "name", csr.Name)
 
 					continue
 				}
 
 				if _, err := r.kclient.CertificatesV1().CertificateSigningRequests().UpdateApproval(ctx, csr.Name, csr, metav1.UpdateOptions{}); err != nil {
-					klog.Errorf("CertificateSigningRequestReconciler: failed to approve/deny CSR %s: %v", csr.Name, err)
+					klog.ErrorS(err, "CertificateSigningRequestReconciler: failed to approve/deny CSR", "name", csr.Name)
 				}
 
 				if !valid {
-					klog.Warningf("CertificateSigningRequestReconciler: has been denied: %s", csr.Name)
+					klog.InfoS("CertificateSigningRequestReconciler: has been denied", "name", csr.Name)
 				} else {
-					klog.V(3).Infof("CertificateSigningRequestReconciler: has been approved: %s", csr.Name)
+					klog.V(3).InfoS("CertificateSigningRequestReconciler: has been approved", "name", csr.Name)
 				}
 			}
 		}

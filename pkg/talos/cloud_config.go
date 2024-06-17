@@ -44,7 +44,7 @@ func readCloudConfig(config io.Reader) (cloudConfig, error) {
 		cfg.Global.Endpoints = strings.Split(endpoints, ",")
 	}
 
-	klog.V(4).Infof("cloudConfig: %+v", cfg)
+	klog.V(4).InfoS("cloudConfig", "cfg", cfg)
 
 	return cfg, nil
 }
