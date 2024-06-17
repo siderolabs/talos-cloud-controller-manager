@@ -14,6 +14,7 @@ import (
 
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/nodeselector"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/transformer"
+	"github.com/siderolabs/talos/pkg/machinery/nethelpers"
 	"github.com/siderolabs/talos/pkg/machinery/resources/network"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
 
@@ -116,7 +117,8 @@ func TestGetNodeAddresses(t *testing.T) {
 				{Address: netip.MustParsePrefix("fe80::e0b5:71ff:fe24:7e60/64")},
 				{Address: netip.MustParsePrefix("fd15:1:2::192:168:0:1/64")},
 				{Address: netip.MustParsePrefix("1.2.3.4/24")},
-				{Address: netip.MustParsePrefix("2001:1234::1/128")},
+				{Address: netip.MustParsePrefix("2001:1234:1:2:3:4:5:6/64"), Flags: nethelpers.AddressFlags(nethelpers.AddressManagementTemp)},
+				{Address: netip.MustParsePrefix("2001:1234::1/64"), Flags: nethelpers.AddressFlags(nethelpers.AddressPermanent)},
 			},
 			expected: []v1.NodeAddress{
 				{Type: v1.NodeInternalIP, Address: "192.168.0.1"},

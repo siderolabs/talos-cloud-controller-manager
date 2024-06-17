@@ -11,6 +11,7 @@ import (
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/transformer"
 	utilsnet "github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/net"
 	"github.com/siderolabs/talos/pkg/machinery/constants"
+	"github.com/siderolabs/talos/pkg/machinery/nethelpers"
 	"github.com/siderolabs/talos/pkg/machinery/resources/network"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
 
@@ -40,7 +41,12 @@ func ipDiscovery(nodeIPs []string, ifaces []network.AddressStatusSpec) (publicIP
 			}
 
 			if ip.Is6() {
-				publicIPv6s = append(publicIPv6s, ip.String())
+				// Prioritize permanent IPv6 addresses
+				if nethelpers.AddressFlag(iface.Flags)&nethelpers.AddressPermanent != 0 {
+					publicIPv6s = append([]string{ip.String()}, publicIPv6s...)
+				} else {
+					publicIPv6s = append(publicIPv6s, ip.String())
+				}
 			} else {
 				publicIPv4s = append(publicIPv4s, ip.String())
 			}

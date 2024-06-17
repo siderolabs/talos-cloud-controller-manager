@@ -142,7 +142,6 @@ linters:
     - depguard
     - errorlint
     - exhaustruct
-    - exhaustivestruct
     - err113
     - forbidigo
     - forcetypeassert
@@ -154,14 +153,12 @@ linters:
     - gomnd
     - gosec
     - mnd
-    - ifshort
     - ireturn # we return interfaces
     - maintidx
     - nestif
     - nilnil # we return "nil, nil"
     - nonamedreturns
     - nolintlint
-    - nosnakecase
     - paralleltest
     - promlinter # https://github.com/golangci/golangci-lint/issues/2222
     - tagliatelle # we have many different conventions
@@ -179,14 +176,6 @@ linters:
     - intrange
 
     # abandoned linters for which golangci shows the warning that the repo is archived by the owner
-    - golint
-    - interfacer
-    - maligned
-    - scopelint
-    - varcheck
-    - structcheck
-    - deadcode
-    - ifshort
     - perfsprint
     - execinquery
 
