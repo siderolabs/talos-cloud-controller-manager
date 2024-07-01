@@ -158,7 +158,12 @@ func setTalosNodeLabels(c *client, meta *runtime.PlatformMetadataSpec) map[strin
 		labels[ClusterNodeLifeCycleLabel] = "spot"
 	}
 
-	if clusterName := c.talos.GetClusterName(); clusterName != "" {
+	clusterName := c.config.Global.ClusterName
+	if clusterName == "" {
+		clusterName = c.talos.GetClusterName()
+	}
+
+	if clusterName != "" {
 		labels[ClusterNameNodeLabel] = clusterName
 	}
 

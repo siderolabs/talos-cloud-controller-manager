@@ -14,10 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// This file should be written by each cloud provider.
-// For an minimal working example, please refer to k8s.io/cloud-provider/sample/basic_main.go
-// For more details, please refer to k8s.io/kubernetes/cmd/cloud-controller-manager/main.go
-
 // Package main provides the CCM implementation.
 package main
 
@@ -26,6 +22,7 @@ import (
 
 	"github.com/spf13/pflag"
 
+	kcmnames "github.com/siderolabs/talos-cloud-controller-manager/pkg/names"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/talos"
 
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -48,8 +45,26 @@ func main() {
 		klog.FlushAndExit(klog.ExitFlushTimeout, 1)
 	}
 
+	controllerInitializers := app.DefaultInitFuncConstructors
+	controllerAliases := names.CCMControllerAliases()
+
+	nodeIpamController := nodeIPAMController{}
+	nodeIpamController.nodeIPAMControllerOptions.NodeIPAMControllerConfiguration = &nodeIpamController.nodeIPAMControllerConfiguration
 	fss := cliflag.NamedFlagSets{}
-	command := app.NewCloudControllerManagerCommand(ccmOptions, cloudInitializer, app.DefaultInitFuncConstructors, names.CCMControllerAliases(), fss, wait.NeverStop)
+	nodeIpamController.nodeIPAMControllerOptions.AddFlags(fss.FlagSet(kcmnames.NodeIpamController))
+
+	controllerInitializers[kcmnames.NodeIpamController] = app.ControllerInitFuncConstructor{
+		// "node-controller" is the shared identity of all node controllers, including node, node lifecycle, and node ipam.
+		// See https://github.com/kubernetes/kubernetes/pull/72764#issuecomment-453300990 for more context.
+		InitContext: app.ControllerInitContext{
+			ClientName: "node-controller",
+		},
+		Constructor: nodeIpamController.startNodeIpamControllerWrapper,
+	}
+
+	app.ControllersDisabledByDefault.Insert(kcmnames.NodeIpamController)
+	controllerAliases["nodeipam"] = kcmnames.NodeIpamController
+	command := app.NewCloudControllerManagerCommand(ccmOptions, cloudInitializer, controllerInitializers, controllerAliases, fss, wait.NeverStop)
 
 	command.Flags().VisitAll(func(flag *pflag.Flag) {
 		if flag.Name == "cloud-provider" {
