@@ -3,9 +3,9 @@ module github.com/siderolabs/talos-cloud-controller-manager
 go 1.22.4
 
 require (
-	github.com/cosi-project/runtime v0.4.5
+	github.com/cosi-project/runtime v0.5.0
 	github.com/siderolabs/net v0.4.0
-	github.com/siderolabs/talos/pkg/machinery v1.7.4
+	github.com/siderolabs/talos/pkg/machinery v1.7.5
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
 	gopkg.in/yaml.v3 v3.0.1
