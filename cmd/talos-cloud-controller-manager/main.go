@@ -62,6 +62,7 @@ func main() {
 		Constructor: nodeIpamController.startNodeIpamControllerWrapper,
 	}
 
+	app.ControllersDisabledByDefault.Insert(kcmnames.NodeLifecycleController)
 	app.ControllersDisabledByDefault.Insert(kcmnames.NodeIpamController)
 	controllerAliases["nodeipam"] = kcmnames.NodeIpamController
 	command := app.NewCloudControllerManagerCommand(ccmOptions, cloudInitializer, controllerInitializers, controllerAliases, fss, wait.NeverStop)

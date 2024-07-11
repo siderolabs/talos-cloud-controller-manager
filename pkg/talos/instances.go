@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"maps"
 	"strings"
+	"time"
 
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/metrics"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/transformer"
@@ -22,6 +23,20 @@ type instances struct {
 	c *client
 }
 
+var (
+	uninitializedTaint = &v1.Taint{
+		Key:    cloudproviderapi.TaintExternalCloudProvider,
+		Effect: v1.TaintEffectNoSchedule,
+	}
+
+	notReadyTaint = &v1.Taint{
+		Key:    v1.TaintNodeNotReady,
+		Effect: v1.TaintEffectNoExecute,
+	}
+
+	initializedNodeDelay = time.Second * 30
+)
+
 func newInstances(client *client) *instances {
 	return &instances{
 		c: client,
@@ -32,6 +47,36 @@ func newInstances(client *client) *instances {
 // Use the node.name or node.spec.providerID field to find the node in the cloud provider.
 func (i *instances) InstanceExists(_ context.Context, node *v1.Node) (bool, error) {
 	klog.V(4).InfoS("instances.InstanceExists() called", "node", klog.KRef("", node.Name))
+
+	if node.Spec.ProviderID == "" {
+		return true, nil
+	}
+
+	notReady := false
+
+	for _, taint := range node.Spec.Taints {
+		if taint.MatchTaint(uninitializedTaint) {
+			return true, nil
+		}
+
+		if taint.MatchTaint(notReadyTaint) {
+			notReady = true
+		}
+	}
+
+	delay := time.Since(node.ObjectMeta.CreationTimestamp.Time)
+	if delay < initializedNodeDelay {
+		klog.V(4).InfoS("instances.InstanceExists() wait initialized node delay", "node", klog.KRef("", node.Name), "delay", delay)
+
+		return true, nil
+	}
+
+	if notReady {
+		if node.Labels[ClusterNodePlatformLabel] == "gcp" &&
+			node.Labels[ClusterNodeLifeCycleLabel] == "spot" {
+			return false, nil
+		}
+	}
 
 	return true, nil
 }
