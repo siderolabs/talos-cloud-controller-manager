@@ -13,37 +13,25 @@ If you have multiple cloud controllers installed in a single cluster, it's possi
 
 Talos CCM tries to solve these issues and helps you to launch multiple CCMs in one cluster.
 
-## Features
+## Controllers
 
-### Node initialize
+Support controllers:
 
-Talos CCM receives the metadata from the Talos platform resource and applies labels to the nodes during the initialization process.
+* cloud-node
+  * Updates node resource with cloud metadata
+  * Assigns labels and taints based on cloud metadata and configuration
+* cloud-node-lifecycle
+  * Cleans up node resource when cloud instance is deleted.
+* node-ipam
+  * Manages the allocation and assignment of CIDR addresses to pods across the nodes in a Kubernetes cluster.
+* csr-approval
+  * Automatically approves Certificate Signing Requests (CSRs) for kubelet server certificates.
 
-Well-Known [labels](https://kubernetes.io/docs/reference/labels-annotations-taints/):
-* topology.kubernetes.io/region
-* topology.kubernetes.io/zone
-* node.kubernetes.io/instance-type
-
-Talos specific labels:
-* node.cloudprovider.kubernetes.io/clustername - talos cluster name
-* node.cloudprovider.kubernetes.io/platform - name of platform
-* node.cloudprovider.kubernetes.io/lifecycle - spot instance type
-
-Node specs:
-* providerID magic string
-* InternalIP and ExternalIP addresses
-
-### Node certificate approval
-
-Talos CCM is responsible for validating a node's certificate signing request (CSR) and approving it.
-When a node wants to join a cluster, it generates a CSR, which includes its identity and other relevant information.
-It checks if the CSR is properly formatted, contains all the required information, and matches the node's identity.
-
-By validating and approving node CSRs, Talos CCM plays a crucial role in maintaining the security and integrity of the cluster by ensuring that only trusted and authorized nodes are allowed to have signed kubelet certificate.
-
-The kubelet certificate is used to secure the communication between the kubelet and other components in the cluster, such as the Kubernetes control plane. It ensures that the communication is encrypted and authenticated and preventing a man-in-the-middle (MITM) attack.
+Read more about cloud [controllers](docs/controllers.md).
 
 ## Example
+
+Kubernetes node resource:
 
 ```yaml
 apiVersion: v1
@@ -73,68 +61,7 @@ status:
 
 ## Install
 
-We need to set the `--cloud-provider=external` flag for each node.
-
-To allow CCM approves/signs the [kubelet certificate signing request](https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/#kubernetes-signers) set the flag `--rotate-server-certificates=true`.
-
-### Prepare control-plane
-
-On the control-plane you need to allow [API access feature](https://www.talos.dev/v1.2/reference/configuration/#featuresconfig):
-
-```yaml
-machine:
-  kubelet:
-    extraArgs:
-      cloud-provider: external
-      rotate-server-certificates: true
-  features:
-    kubernetesTalosAPIAccess:
-      enabled: true
-      allowedRoles:
-        - os:reader
-      allowedKubernetesNamespaces:
-        - kube-system
-```
-
-### Prepare worker nodes
-
-```yaml
-machine:
-  kubelet:
-    extraArgs:
-      cloud-provider: external
-      rotate-server-certificates: true
-```
-
-### Method 1: talos machine config
-
-```yaml
-cluster:
-  externalCloudProvider:
-    enabled: true
-    manifests:
-      - https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
-```
-
-### Method 2: kubectl
-
-Latest release:
-
-```shell
-kubectl apply -f https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager.yml
-```
-
-Latest stable version (edge):
-
-```shell
-kubectl apply -f https://raw.githubusercontent.com/siderolabs/talos-cloud-controller-manager/main/docs/deploy/cloud-controller-manager-edge.yml
-```
-
-### Method 3: helm chart
-
-```shell
-helm upgrade -i -n kube-system talos-cloud-controller-manager oci://ghcr.io/siderolabs/charts/talos-cloud-controller-manager
-```
+See [Install](docs/install.md) for installation instructions.
 
 ## Community
 
