@@ -377,7 +377,7 @@ func TestSyncNodeLabels(t *testing.T) {
 	}
 }
 
-func TestCsrNodeChecks(t *testing.T) {
+func TestCSRNodeChecks(t *testing.T) {
 	ctx := context.Background()
 	nodes := &v1.NodeList{
 		Items: []v1.Node{
@@ -528,7 +528,7 @@ func TestCsrNodeChecks(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			kclient := fake.NewSimpleClientset(nodes)
-			approve, err := csrNodeChecks(ctx, kclient, tt.cert)
+			approve, err := CSRNodeChecks(ctx, kclient, tt.cert)
 
 			if tt.expectedError != nil {
 				assert.Equal(t, tt.expectedError.Error(), err.Error())

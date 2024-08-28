@@ -21,12 +21,9 @@
 
 replicaCount: 2
 
-features:
-  # `approveNodeCSR` - check and approve node CSR.
-  approveNodeCSR: true
-
 enabledControllers:
   - cloud-node
+  - node-csr-approval
 
 # Deploy CCM only on control-plane nodes
 nodeSelector:

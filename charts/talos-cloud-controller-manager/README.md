@@ -1,6 +1,6 @@
 # talos-cloud-controller-manager
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.0](https://img.shields.io/badge/AppVersion-v1.6.0-informational?style=flat-square)
+![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.0](https://img.shields.io/badge/AppVersion-v1.6.0-informational?style=flat-square)
 
 Talos Cloud Controller Manager Helm Chart
 
@@ -27,12 +27,9 @@ Kubernetes: `>= 1.24.0`
 
 replicaCount: 2
 
-features:
-  # `approveNodeCSR` - check and approve node CSR.
-  approveNodeCSR: true
-
 enabledControllers:
   - cloud-node
+  - node-csr-approval
 
 # Deploy CCM only on control-plane nodes
 nodeSelector:
@@ -54,9 +51,8 @@ helm upgrade -i --namespace=kube-system -f talos-ccm.yaml \
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity for data pods assignment. ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| enabledControllers | list | `["cloud-node"]` | List of controllers should be enabled. Use '*' to enable all controllers. Support only `cloud-node` controller. |
+| enabledControllers | list | `["cloud-node","node-csr-approval"]` | List of controllers should be enabled. Use '*' to enable all controllers. Support only `cloud-node, cloud-node-lifecycle, node-csr-approval, node-ipam-controller` controllers. |
 | extraArgs | list | `[]` | Any extra arguments for talos-cloud-controller-manager |
-| features.approveNodeCSR | bool | `true` | List of CCM features. `approveNodeCSR` - check and approve node CSR. |
 | fullnameOverride | string | `""` | String to fully override deployment name. |
 | image.pullPolicy | string | `"IfNotPresent"` | Pull policy: IfNotPresent or Always. |
 | image.repository | string | `"ghcr.io/siderolabs/talos-cloud-controller-manager"` | CCM image repository. |

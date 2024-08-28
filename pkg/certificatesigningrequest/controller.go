@@ -86,6 +86,13 @@ func (r *Reconciler) Run(ctx context.Context) {
 					continue
 				}
 
+				if csr.Spec.SignerName != certificatesv1.KubeletServingSignerName {
+					klog.V(5).InfoS("CertificateSigningRequestReconciler: ignoring, not a Kubelet serving certificate",
+						"signer", csr.Spec.SignerName)
+
+					continue
+				}
+
 				valid, err := r.Reconcile(ctx, csr)
 				if err != nil {
 					klog.ErrorS(err, "CertificateSigningRequestReconciler: failed to reconcile CSR", "name", csr.Name)

@@ -5,7 +5,7 @@ kind: ServiceAccount
 metadata:
   name: talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.3.0
+    helm.sh/chart: talos-cloud-controller-manager-0.4.0
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
     app.kubernetes.io/version: "v1.6.0"
@@ -18,7 +18,7 @@ kind: ServiceAccount
 metadata:
   name: talos-cloud-controller-manager-talos-secrets
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.3.0
+    helm.sh/chart: talos-cloud-controller-manager-0.4.0
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
     app.kubernetes.io/version: "v1.6.0"
@@ -34,7 +34,7 @@ kind: ConfigMap
 metadata:
   name: talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.3.0
+    helm.sh/chart: talos-cloud-controller-manager-0.4.0
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
     app.kubernetes.io/version: "v1.6.0"
@@ -43,7 +43,6 @@ metadata:
 data:
   ccm-config.yaml: |
     global:
-      approveNodeCSR: true
 ---
 # Source: talos-cloud-controller-manager/templates/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -51,7 +50,7 @@ kind: ClusterRole
 metadata:
   name: system:talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.3.0
+    helm.sh/chart: talos-cloud-controller-manager-0.4.0
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
     app.kubernetes.io/version: "v1.6.0"
@@ -159,7 +158,7 @@ kind: Service
 metadata:
   name: talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.3.0
+    helm.sh/chart: talos-cloud-controller-manager-0.4.0
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
     app.kubernetes.io/version: "v1.6.0"
@@ -169,7 +168,7 @@ spec:
   clusterIP: None
   type: ClusterIP
   ports:
-    - name: https
+    - name: metrics
       port: 50258
       targetPort: 50258
       protocol: TCP
@@ -183,7 +182,7 @@ kind: Deployment
 metadata:
   name: talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.3.0
+    helm.sh/chart: talos-cloud-controller-manager-0.4.0
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
     app.kubernetes.io/version: "v1.6.0"
@@ -210,6 +209,7 @@ spec:
         runAsGroup: 10258
         runAsNonRoot: true
         runAsUser: 10258
+      priorityClassName: system-cluster-critical
       containers:
         - name: talos-cloud-controller-manager
           securityContext:
@@ -226,18 +226,19 @@ spec:
             - --v=2
             - --cloud-provider=talos
             - --cloud-config=/etc/talos/ccm-config.yaml
-            - --controllers=cloud-node
+            - --controllers=cloud-node,node-csr-approval
             - --leader-elect-resource-name=cloud-controller-manager-talos
             - --use-service-account-credentials
             - --secure-port=50258
+            - --authorization-always-allow-paths=/healthz,/livez,/readyz,/metrics
           ports:
-            - containerPort: 50258
-              name: https
+            - name: metrics
+              containerPort: 50258
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /healthz
-              port: https
+              port: metrics
               scheme: HTTPS
             initialDelaySeconds: 20
             periodSeconds: 30

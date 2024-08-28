@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/siderolabs/talos-cloud-controller-manager/pkg/certificatesigningrequest"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/talosclient"
 
 	clientkubernetes "k8s.io/client-go/kubernetes"
@@ -32,8 +31,7 @@ const (
 type Cloud struct {
 	client *client
 
-	instancesV2   cloudprovider.InstancesV2
-	csrController *certificatesigningrequest.Reconciler
+	instancesV2 cloudprovider.InstancesV2
 
 	ctx  context.Context //nolint:containedctx
 	stop func()
@@ -107,13 +105,6 @@ func (c *Cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, 
 		klog.V(3).InfoS("received cloud provider termination signal")
 		provider.stop()
 	}(c)
-
-	if c.client.config.Global.ApproveNodeCSR {
-		klog.InfoS("Started CSR Node controller")
-
-		c.csrController = certificatesigningrequest.NewCsrController(c.client.kclient, csrNodeChecks)
-		go c.csrController.Run(c.ctx)
-	}
 
 	klog.InfoS("talos initialized")
 }

@@ -62,11 +62,21 @@ func main() {
 		Constructor: nodeIpamController.startNodeIpamControllerWrapper,
 	}
 
+	nodeCSRApproval := nodeCSRApprovalController{}
+	controllerInitializers[kcmnames.CertificateSigningRequestApprovingController] = app.ControllerInitFuncConstructor{
+		InitContext: app.ControllerInitContext{
+			ClientName: talos.ServiceAccountName,
+		},
+		Constructor: nodeCSRApproval.startNodeCSRApprovalControllerWrapper,
+	}
+
 	app.ControllersDisabledByDefault.Insert(kcmnames.NodeLifecycleController)
 	app.ControllersDisabledByDefault.Insert(kcmnames.NodeIpamController)
+	app.ControllersDisabledByDefault.Insert(kcmnames.CertificateSigningRequestApprovingController)
 	controllerAliases["nodeipam"] = kcmnames.NodeIpamController
-	command := app.NewCloudControllerManagerCommand(ccmOptions, cloudInitializer, controllerInitializers, controllerAliases, fss, wait.NeverStop)
+	controllerAliases["node-csr-approval"] = kcmnames.CertificateSigningRequestApprovingController
 
+	command := app.NewCloudControllerManagerCommand(ccmOptions, cloudInitializer, controllerInitializers, controllerAliases, fss, wait.NeverStop)
 	command.Flags().VisitAll(func(flag *pflag.Flag) {
 		if flag.Name == "cloud-provider" {
 			if err := flag.Value.Set(talos.ProviderName); err != nil {

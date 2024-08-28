@@ -72,11 +72,11 @@ build: ## Build
 
 .PHONY: run
 run: build
-	./talos-cloud-controller-manager-$(ARCH) --v=5 --kubeconfig=kubeconfig --cloud-config=hack/ccm-config.yaml --controllers=cloud-node,node-ipam-controller \
+	./talos-cloud-controller-manager-$(ARCH) --v=5 --kubeconfig=kubeconfig --cloud-config=hack/ccm-config.yaml --controllers=cloud-node,node-csr-approval,node-ipam-controller \
 		--allocate-node-cidrs \
 		--node-cidr-mask-size-ipv4=24 --node-cidr-mask-size-ipv6=80 \
 		--cidr-allocator-type=CloudAllocator \
-		--use-service-account-credentials --leader-elect=false --bind-address=127.0.0.1 --secure-port=0 --authorization-always-allow-paths=/healthz,/livez,/readyz,/metrics
+		--use-service-account-credentials --leader-elect=false --bind-address=127.0.0.1 --secure-port=8443 --authorization-always-allow-paths=/healthz,/livez,/readyz,/metrics
 
 .PHONY: lint
 lint: ## Lint Code

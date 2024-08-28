@@ -13,7 +13,7 @@ spec:
   clusterIP: None
   type: ClusterIP
   ports:
-    - name: https
+    - name: metrics
       port: {{ .Values.service.port }}
       targetPort: {{ .Values.service.containerPort }}
       protocol: TCP

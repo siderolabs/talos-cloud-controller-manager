@@ -75,13 +75,13 @@ spec:
               value: "6443"
           {{- end }}
           ports:
-            - containerPort: {{ .Values.service.containerPort }}
-              name: https
+            - name: metrics
+              containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /healthz
-              port: https
+              port: metrics
               scheme: HTTPS
             initialDelaySeconds: 20
             periodSeconds: 30

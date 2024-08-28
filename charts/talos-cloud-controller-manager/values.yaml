@@ -28,17 +28,14 @@ extraArgs: []
 
 # -- List of controllers should be enabled.
 # Use '*' to enable all controllers.
-# Support only `cloud-node` controller.
+# Support only `cloud-node, cloud-node-lifecycle, node-csr-approval, node-ipam-controller` controllers.
 enabledControllers:
   - cloud-node
   # - cloud-node-lifecycle
   # - route
   # - service
-
-features:
-  # -- List of CCM features.
-  # `approveNodeCSR` - check and approve node CSR.
-  approveNodeCSR: true
+  - node-csr-approval
+  # - node-ipam-controller
 
 # -- List of node transformations.
 # Available matchExpressions key values: https://github.com/siderolabs/talos/blob/main/pkg/machinery/resources/runtime/platform_metadata.go#L28
@@ -73,7 +70,7 @@ serviceAccount:
   name: ""
 
 # -- CCM pods' priorityClassName.
-priorityClassName: ""
+priorityClassName: system-cluster-critical
 
 # -- Annotations for data pods.
 # ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/

@@ -189,8 +189,9 @@ func syncNodeLabels(c *client, node *v1.Node, nodeLabels map[string]string) erro
 	return nil
 }
 
+// CSRNodeChecks checks if the IP addresses in the CSR match the IP addresses of the node.
 // TODO: add more checks, like domain name, worker nodes don't have controlplane IPs, etc...
-func csrNodeChecks(ctx context.Context, kclient clientkubernetes.Interface, x509cr *x509.CertificateRequest) (bool, error) {
+func CSRNodeChecks(ctx context.Context, kclient clientkubernetes.Interface, x509cr *x509.CertificateRequest) (bool, error) {
 	node, err := kclient.CoreV1().Nodes().Get(ctx, x509cr.DNSNames[0], metav1.GetOptions{})
 	if err != nil {
 		return false, fmt.Errorf("failed to get node %s: %w", x509cr.DNSNames[0], err)
