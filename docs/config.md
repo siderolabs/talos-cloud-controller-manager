@@ -56,10 +56,8 @@ Talos CCM configuration file:
 ```yaml
 # Global parameters
 global:
-  # Check and approve node client certificate signing requests
-  # In case when you use `rotate-server-certificates` flag in kubelet
-  # Parameter is optional, by default is "false"
-  approveNodeCSR: true
+  # PreferIPv6 uses to prefer IPv6 addresses over IPv4 addresses
+  PreferIPv6: false
 
 # Transformations rules for nodes
 transformations:

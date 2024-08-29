@@ -178,7 +178,7 @@ spec:
 ---
 # Source: talos-cloud-controller-manager/templates/deployment.yaml
 apiVersion: apps/v1
-kind: Deployment
+kind: DaemonSet
 metadata:
   name: talos-cloud-controller-manager
   labels:
@@ -189,8 +189,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 spec:
-  replicas: 1
-  strategy:
+  updateStrategy:
     type: RollingUpdate
   selector:
     matchLabels:
@@ -209,6 +208,8 @@ spec:
         runAsGroup: 10258
         runAsNonRoot: true
         runAsUser: 10258
+      dnsPolicy: ClusterFirstWithHostNet
+      hostNetwork: true
       priorityClassName: system-cluster-critical
       containers:
         - name: talos-cloud-controller-manager
@@ -231,6 +232,17 @@ spec:
             - --use-service-account-credentials
             - --secure-port=50258
             - --authorization-always-allow-paths=/healthz,/livez,/readyz,/metrics
+          env:
+            - name: TALOS_ENDPOINTS
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: KUBERNETES_SERVICE_HOST
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: KUBERNETES_SERVICE_PORT
+              value: "6443"
           ports:
             - name: metrics
               containerPort: 50258
@@ -262,6 +274,9 @@ spec:
           operator: Exists
         - effect: NoSchedule
           key: node.cloudprovider.kubernetes.io/uninitialized
+          operator: Exists
+        - effect: NoSchedule
+          key: node.kubernetes.io/not-ready
           operator: Exists
       volumes:
         - name: cloud-config

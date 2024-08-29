@@ -14,10 +14,6 @@ func TestReadCloudConfigEmpty(t *testing.T) {
 	if cfg.Global.PreferIPv6 {
 		t.Errorf("%v is not default value of preferIPv6", cfg.Global.PreferIPv6)
 	}
-
-	if cfg.Global.ApproveNodeCSR {
-		t.Errorf("%v is not default value of ApproveNodeCSR", cfg.Global.ApproveNodeCSR)
-	}
 }
 
 func TestReadCloudConfig(t *testing.T) {
@@ -25,7 +21,6 @@ func TestReadCloudConfig(t *testing.T) {
 
 	cfg, err := readCloudConfig(strings.NewReader(`
 global:
-  approveNodeCSR: true
   preferIPv6: true
 transformations:
 - name: cluster
@@ -47,9 +42,5 @@ transformations:
 
 	if !cfg.Global.PreferIPv6 {
 		t.Errorf("incorrect preferIPv6: %v", cfg.Global.PreferIPv6)
-	}
-
-	if !cfg.Global.ApproveNodeCSR {
-		t.Errorf("incorrect ApproveNodeCSR: %v", cfg.Global.ApproveNodeCSR)
 	}
 }

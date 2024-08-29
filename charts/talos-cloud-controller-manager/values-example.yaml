@@ -1,6 +1,61 @@
 
+# Use latest Talos image
 image:
   pullPolicy: Always
   tag: edge
 
+# Logging details
 logVerbosityLevel: 4
+
+# Allow node CSR approval and cloud-node controllers
+enabledControllers:
+  - cloud-node
+  - node-csr-approval
+  - node-ipam-controller
+
+# Define the CIDR allocator type and mask sizes (for node-ipam-controller only)
+extraArgs:
+  - --allocate-node-cidrs
+  - --cidr-allocator-type=CloudAllocator
+  - --node-cidr-mask-size-ipv4=24
+  - --node-cidr-mask-size-ipv6=80
+
+# Add extra labels to nodes based on their hostname
+transformations:
+  - name: web
+    nodeSelector:
+      - matchExpressions:
+          - key: hostname
+            operator: Regexp
+            values:
+              - ^web-.+$
+    labels:
+      node-role.kubernetes.io/web: ""
+
+  - name: worker
+    nodeSelector:
+      - matchExpressions:
+          - key: hostname
+            operator: Regexp
+            values:
+              - ^worker-.+$
+    labels:
+      node-role.kubernetes.io/worker: ""
+
+  - name: db
+    nodeSelector:
+      - matchExpressions:
+          - key: hostname
+            operator: Regexp
+            values:
+              - ^db-.+$
+    labels:
+      node-role.kubernetes.io/db: ""
+
+# Deploy the Talos Cloud Controller Manager as a DaemonSet
+useDaemonSet: true
+
+# Tolerate all taints
+tolerations:
+  - effect: NoSchedule
+    operator: Exists

@@ -18,8 +18,6 @@ type cloudConfig struct {
 }
 
 type cloudConfigGlobal struct {
-	// Approve Node Certificate Signing Request.
-	ApproveNodeCSR bool `yaml:"approveNodeCSR,omitempty"`
 	// Talos cluster name.
 	ClusterName string `yaml:"clusterName,omitempty"`
 	// Prefer IPv6.

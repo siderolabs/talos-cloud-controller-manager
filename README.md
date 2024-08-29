@@ -22,9 +22,9 @@ Support controllers:
   * Assigns labels and taints based on cloud metadata and configuration
 * cloud-node-lifecycle
   * Cleans up node resource when cloud instance is deleted.
-* node-ipam
+* node-ipam-controller
   * Manages the allocation and assignment of CIDR addresses to pods across the nodes in a Kubernetes cluster.
-* csr-approval
+* node-csr-approval
   * Automatically approves Certificate Signing Requests (CSRs) for kubelet server certificates.
 
 Read more about cloud [controllers](docs/controllers.md).

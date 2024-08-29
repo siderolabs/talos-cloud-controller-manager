@@ -25,6 +25,10 @@ fullnameOverride: ""
 # -- Any extra arguments for talos-cloud-controller-manager
 extraArgs: []
   # - --cluster-name=kubernetes
+  # Node IPAM controller arguments
+  # - --cidr-allocator-type=CloudAllocator
+  # - --node-cidr-mask-size-ipv4=24
+  # - --node-cidr-mask-size-ipv6=80
 
 # -- List of controllers should be enabled.
 # Use '*' to enable all controllers.
@@ -34,7 +38,7 @@ enabledControllers:
   # - cloud-node-lifecycle
   # - route
   # - service
-  - node-csr-approval
+  # - node-csr-approval
   # - node-ipam-controller
 
 # -- List of node transformations.
@@ -146,6 +150,8 @@ tolerations:
   - effect: NoSchedule
     key: node.cloudprovider.kubernetes.io/uninitialized
     operator: Exists
+  # - effect: NoSchedule
+  #   operator: Exists
 
 # -- Affinity for data pods assignment.
 # ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
