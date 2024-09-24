@@ -67,7 +67,7 @@ type cloudAllocator struct {
 
 	// queues are where incoming work is placed to de-dup and to allow "easy"
 	// rate limited requeues on errors
-	queue workqueue.RateLimitingInterface
+	queue workqueue.TypedRateLimitingInterface[string]
 }
 
 var (
@@ -123,7 +123,10 @@ func NewCIDRCloudAllocator(
 		nodesSynced:  nodeInformer.Informer().HasSynced,
 		broadcaster:  eventBroadcaster,
 		recorder:     recorder,
-		queue:        workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "cidrallocator_node"),
+		queue: workqueue.NewTypedRateLimitingQueueWithConfig(
+			workqueue.DefaultTypedControllerRateLimiter[string](),
+			workqueue.TypedRateLimitingQueueConfig[string]{Name: "cidrallocator_node"},
+		),
 	}
 
 	if allocatorParams.ServiceCIDR != nil {
@@ -237,7 +240,7 @@ func (r *cloudAllocator) processNextNodeWorkItem(ctx context.Context) bool {
 	}
 
 	// We wrap this block in a func so we can defer r.queue.Done.
-	err := func(logger klog.Logger, obj interface{}) error {
+	err := func(logger klog.Logger, obj string) error {
 		// We call Done here so the workNodeQueue knows we have finished
 		// processing this item. We also must remember to call Forget if we
 		// do not want this work item being re-queued. For example, we do
@@ -246,40 +249,21 @@ func (r *cloudAllocator) processNextNodeWorkItem(ctx context.Context) bool {
 		// period.
 		defer r.queue.Done(obj)
 
-		var (
-			key string
-			ok  bool
-		)
-
-		// We expect strings to come off the workNodeQueue. These are of the
-		// form namespace/name. We do this as the delayed nature of the
-		// workNodeQueue means the items in the informer cache may actually be
-		// more up to date that when the item was initially put onto the
-		// workNodeQueue.
-		if key, ok = obj.(string); !ok {
-			// As the item in the workNodeQueue is actually invalid, we call
-			// Forget here else we'd go into a loop of attempting to
-			// process a work item that is invalid.
-			r.queue.Forget(obj)
-			utilruntime.HandleError(fmt.Errorf("expected string in workNodeQueue but got %#v", obj))
-
-			return nil
-		}
 		// Run the syncHandler, passing it the namespace/name string of the
 		// Foo resource to be synced.
-		if err := r.syncNode(ctx, key); err != nil {
+		if err := r.syncNode(ctx, obj); err != nil {
 			// Put the item back on the queue to handle any transient errors.
-			r.queue.AddRateLimited(key)
+			r.queue.AddRateLimited(obj)
 
-			return fmt.Errorf("error syncing '%s': %s, requeuing", key, err.Error())
+			return fmt.Errorf("error syncing '%s': %s, requeuing", obj, err.Error())
 		}
 		// Finally, if no error occurs we Forget this item so it does not
 		// get queue again until another change happens.
 		r.queue.Forget(obj)
-		logger.Info("Successfully synced", "key", key)
+		logger.Info("Successfully synced", "node", obj)
 
 		for k, cidrSet := range r.cidrSets {
-			logger.V(5).Info("IPAM status", "node", key, "subnet", k.String(), "size", cidrSet.String())
+			logger.V(5).Info("IPAM status", "node", obj, "subnet", k.String(), "size", cidrSet.String())
 		}
 
 		return nil
