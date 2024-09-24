@@ -1,4 +1,40 @@
 
+<a name="v1.8.0"></a>
+## [v1.8.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.6.0...v1.8.0) (2024-09-24)
+
+Welcome to the v1.8.0 release of Talos CCM!
+
+### Features
+- gcp spot instances
+- node ipam controller
+- prefer permanent ipv6
+- transformer functions
+- expose metrics
+- node transformer feature flags
+- node transformer
+
+### Changelog
+
+* 8350f49 chore: bump deps
+* 01145da docs: update deploy documentation
+* 09a5b9e refactor: csr approval controller
+* 31c9b5b docs: split readme file
+* 122019a chore: bump deps
+* 326fc53 feat: gcp spot instances
+* e1a0e0e feat: node ipam controller
+* 3b20bb0 refactor: contextual logging
+* 3a4ae03 feat: prefer permanent ipv6
+* 7dac5b8 fix: set priorityClassName
+* 53034c8 chore: clean flag
+* 9dde8aa fix: empty terms
+* 749a01d fix: make possible mutate provider-id
+* c0988a3 docs: add config documentation
+* 386958d feat: transformer functions
+* 0e8728c feat: expose metrics
+* 0faf0ae fix: refresh talos token
+* 85e2022 feat: node transformer feature flags
+* 22e3984 feat: node transformer
+
 <a name="v1.6.0"></a>
 ## [v1.6.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.4.0...v1.6.0) (2024-04-21)
 

@@ -38,7 +38,7 @@ enabledControllers:
   # - cloud-node-lifecycle
   # - route
   # - service
-  # - node-csr-approval
+  - node-csr-approval
   # - node-ipam-controller
 
 # -- List of node transformations.

@@ -14,6 +14,37 @@
 
 {{ template "chart.requirementsSection" . }}
 
+## Talos machine config
+
+The control plane configuration should be set with the following settings:
+
+```yaml
+machine:
+  kubelet:
+    extraArgs:
+      cloud-provider: external
+      # For security reasons, it is recommended to enable the rotation of server certificates.
+      rotate-server-certificates: true
+  features:
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles:
+        - os:reader
+      allowedKubernetesNamespaces:
+        - kube-system
+```
+
+The worker nodes configuration should include the following settings:
+
+```yaml
+machine:
+  kubelet:
+    extraArgs:
+      cloud-provider: external
+      # For security reasons, it is recommended to enable the rotation of server certificates.
+      rotate-server-certificates: true
+```
+
 ## Deploy example
 
 ```yaml

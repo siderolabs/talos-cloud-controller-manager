@@ -1,6 +1,6 @@
 # talos-cloud-controller-manager
 
-![Version: 0.4.1](https://img.shields.io/badge/Version-0.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.6.0](https://img.shields.io/badge/AppVersion-v1.6.0-informational?style=flat-square)
+![Version: 0.4.2](https://img.shields.io/badge/Version-0.4.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.8.0](https://img.shields.io/badge/AppVersion-v1.8.0-informational?style=flat-square)
 
 Talos Cloud Controller Manager Helm Chart
 
@@ -19,6 +19,37 @@ Talos Cloud Controller Manager Helm Chart
 ## Requirements
 
 Kubernetes: `>= 1.24.0`
+
+## Talos machine config
+
+The control plane configuration should be set with the following settings:
+
+```yaml
+machine:
+  kubelet:
+    extraArgs:
+      cloud-provider: external
+      # For security reasons, it is recommended to enable the rotation of server certificates.
+      rotate-server-certificates: true
+  features:
+    kubernetesTalosAPIAccess:
+      enabled: true
+      allowedRoles:
+        - os:reader
+      allowedKubernetesNamespaces:
+        - kube-system
+```
+
+The worker nodes configuration should include the following settings:
+
+```yaml
+machine:
+  kubelet:
+    extraArgs:
+      cloud-provider: external
+      # For security reasons, it is recommended to enable the rotation of server certificates.
+      rotate-server-certificates: true
+```
 
 ## Deploy example
 
@@ -51,7 +82,7 @@ helm upgrade -i --namespace=kube-system -f talos-ccm.yaml \
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity for data pods assignment. ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| enabledControllers | list | `["cloud-node"]` | List of controllers should be enabled. Use '*' to enable all controllers. Support only `cloud-node, cloud-node-lifecycle, node-csr-approval, node-ipam-controller` controllers. |
+| enabledControllers | list | `["cloud-node","node-csr-approval"]` | List of controllers should be enabled. Use '*' to enable all controllers. Support only `cloud-node, cloud-node-lifecycle, node-csr-approval, node-ipam-controller` controllers. |
 | extraArgs | list | `[]` | Any extra arguments for talos-cloud-controller-manager |
 | fullnameOverride | string | `""` | String to fully override deployment name. |
 | image.pullPolicy | string | `"IfNotPresent"` | Pull policy: IfNotPresent or Always. |
