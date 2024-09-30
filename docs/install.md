@@ -67,7 +67,11 @@ Values example can be found [here](../charts/talos-cloud-controller-manager/valu
 helm upgrade -i -n kube-system talos-cloud-controller-manager oci://ghcr.io/siderolabs/charts/talos-cloud-controller-manager
 ```
 
-## Result example
+## Example
+
+This example deploys the Talos Cloud Controller Manager on a Talos cluster with __IPv4__ and __IPv6__ support.
+IPv6 is globally routable, and the subnet is allocated to the node and used for podCIDRs.
+If you don't need IPv6 on pods, please follow instructions above.
 
 Talos Machine Config:
 
@@ -131,7 +135,34 @@ web-02a            Ready    web             61d   v1.30.2   172.16.0.145   2a01:
 ["10.32.0.0/24","2a01:4f8:0:3064::/80"] ["10.32.3.0/24","2a01:4f8:0:3064:1::/80"] ["10.32.1.0/24","2a01:4f8:0:30ac::/80"]
 ```
 
-Talos CCM:
+Talos CCM did the following:
 * adds the node-role label to the nodes by hostname
 * define the EXTERNAL-IP
 * podCIDRs allocation from IPv6 node subnet, they have two different IPv6/64 subnets (2a01:4f8:0:3064/64, 2a01:4f8:0:30ac::/64)
+
+## Troubleshooting
+
+How CCM works:
+
+1. kubelet in mode `cloud-provider=external` join the cluster and send the `Node` object to the API server.
+Node object has values:
+    * `node.cloudprovider.kubernetes.io/uninitialized` taint.
+    * `alpha.kubernetes.io/provided-node-ip` annotation with the node IP.
+    * `nodeInfo` field with system information.
+2. CCM detects the new node and sends a request to the Talos API to get the node configuration.
+3. CCM updates the `Node` object with labels, taints and `providerID` field.
+4. CCM removes the `node.cloudprovider.kubernetes.io/uninitialized` taint.
+5. Node now is initialized and ready to use.
+
+If `kubelet` does not have `cloud-provider=external` flag, kubelet will expect that no external CCM is running and will try to manage the node lifecycle by itself.
+This can cause issues with Talos CCM.
+So, CCM will skip the node and will not update the `Node` object.
+
+### Steps to troubleshoot
+
+1. Scale down the CCM deployment to 1 replica (in deployment case). In multiple replicas, only one pod is responsible for the node initialization all other pods are in the `standby` mode.
+2. Set log level to `--v=5` in the deployment.
+3. Check the logs
+4. Check kubelet flag `--cloud-provider=external`, delete the node resource and restart the kubelet.
+5. Check the logs
+7. Check tains, labels, and providerID in the `Node` object.
