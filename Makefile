@@ -122,11 +122,11 @@ docs:
 		charts/talos-cloud-controller-manager > docs/deploy/cloud-controller-manager-edge.yml
 	helm template -n kube-system talos-cloud-controller-manager \
 		--set-string image.tag=$(TAG) \
-		--set useDaemonSet=true \
+		--set daemonSet.enabled=true \
 		charts/talos-cloud-controller-manager > docs/deploy/cloud-controller-manager-daemonset.yml
 	helm template -n kube-system talos-cloud-controller-manager \
 		-f charts/talos-cloud-controller-manager/values.edge.yaml \
-		--set useDaemonSet=true \
+		--set daemonSet.enabled=true \
 		charts/talos-cloud-controller-manager > docs/deploy/cloud-controller-manager-daemonset-edge.yml
 	helm-docs charts/talos-cloud-controller-manager
 

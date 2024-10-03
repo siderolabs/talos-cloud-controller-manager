@@ -82,6 +82,9 @@ helm upgrade -i --namespace=kube-system -f talos-ccm.yaml \
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity for data pods assignment. ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| daemonSet | object | `{"enabled":false,"k8s":{"serviceHost":"","servicePort":6443}}` | Deploy CCM  in Daemonset mode. CCM will use hostNetwork and connect to the Kubernetes API server on the current node by default. Optionally you can specify the Kubernetes API server host and port. You can run it without CNI plugin. |
+| daemonSet.k8s.serviceHost | string | `""` | Kubernetes API server host. Default is the current node IP. |
+| daemonSet.k8s.servicePort | int | `6443` | Kubernetes API server port. Default is 6443. |
 | enabledControllers | list | `["cloud-node","node-csr-approval"]` | List of controllers should be enabled. Use '*' to enable all controllers. Support only `cloud-node, cloud-node-lifecycle, node-csr-approval, node-ipam-controller` controllers. |
 | extraArgs | list | `[]` | Any extra arguments for talos-cloud-controller-manager |
 | fullnameOverride | string | `""` | String to fully override deployment name. |
@@ -108,4 +111,3 @@ helm upgrade -i --namespace=kube-system -f talos-ccm.yaml \
 | tolerations | list | `[{"effect":"NoSchedule","key":"node-role.kubernetes.io/control-plane","operator":"Exists"},{"effect":"NoSchedule","key":"node.cloudprovider.kubernetes.io/uninitialized","operator":"Exists"}]` | Tolerations for data pods assignment. ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | transformations | list | `[]` | List of node transformations. Available matchExpressions key values: https://github.com/siderolabs/talos/blob/main/pkg/machinery/resources/runtime/platform_metadata.go#L28 |
 | updateStrategy | object | `{"rollingUpdate":{"maxUnavailable":1},"type":"RollingUpdate"}` | Deployment update stategy type. ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment |
-| useDaemonSet | bool | `false` | Deploy CCM  in Daemonset mode. CCM will use hostNetwork and current node to access kubernetes/talos API You can run it without CNI plugin. |

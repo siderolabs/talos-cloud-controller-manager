@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-{{- if .Values.useDaemonSet }}
+{{- if .Values.daemonSet.enabled }}
 kind: DaemonSet
 {{- else }}
 kind: Deployment
@@ -10,7 +10,7 @@ metadata:
     {{- include "talos-cloud-controller-manager.labels" . | nindent 4 }}
   namespace: {{ .Release.Namespace }}
 spec:
-  {{- if not .Values.useDaemonSet }}
+  {{- if not .Values.daemonSet.enabled }}
   replicas: {{ .Values.replicaCount }}
   strategy:
     type: {{ .Values.updateStrategy.type }}
@@ -37,7 +37,7 @@ spec:
       serviceAccountName: {{ include "talos-cloud-controller-manager.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if .Values.useDaemonSet }}
+      {{- if .Values.daemonSet.enabled }}
       dnsPolicy: ClusterFirstWithHostNet
       hostNetwork: true
       {{- end }}
@@ -61,18 +61,22 @@ spec:
           {{- with .Values.extraArgs }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.useDaemonSet }}
+          {{- if .Values.daemonSet.enabled }}
           env:
             - name: TALOS_ENDPOINTS
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
             - name: KUBERNETES_SERVICE_HOST
+              {{- if .Values.daemonSet.k8s.serviceHost }}
+              value: {{ .Values.daemonSet.k8s.serviceHost }}
+              {{- else }}
               valueFrom:
                 fieldRef:
                   fieldPath: status.podIP
+              {{- end }}
             - name: KUBERNETES_SERVICE_PORT
-              value: "6443"
+              value: {{ quote .Values.daemonSet.k8s.servicePort }}
           {{- end }}
           ports:
             - name: metrics
@@ -107,7 +111,7 @@ spec:
       {{- with .Values.tolerations }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.useDaemonSet }}
+      {{- if .Values.daemonSet.enabled }}
         - effect: NoSchedule
           key: node.kubernetes.io/not-ready
           operator: Exists

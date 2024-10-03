@@ -125,9 +125,16 @@ resources:
     memory: 64Mi
 
 # -- Deploy CCM  in Daemonset mode.
-# CCM will use hostNetwork and current node to access kubernetes/talos API
+# CCM will use hostNetwork and connect to the Kubernetes API server on the current node by default.
+# Optionally you can specify the Kubernetes API server host and port.
 # You can run it without CNI plugin.
-useDaemonSet: false
+daemonSet:
+  enabled: false
+  k8s:
+    # -- Kubernetes API server host. Default is the current node IP.
+    serviceHost: ""
+    # -- Kubernetes API server port. Default is 6443.
+    servicePort: 6443
 
 # -- Deployment update stategy type.
 # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment
