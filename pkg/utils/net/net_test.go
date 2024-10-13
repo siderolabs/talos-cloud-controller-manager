@@ -107,7 +107,7 @@ func TestSortedNodeIPs(t *testing.T) {
 	}
 }
 
-func TestPreferedDualStackNodeIPs(t *testing.T) {
+func TestPreferredDualStackNodeIPs(t *testing.T) {
 	t.Parallel()
 
 	for _, tt := range []struct { //nolint:govet
@@ -146,7 +146,7 @@ func TestPreferedDualStackNodeIPs(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
-			result := utilnet.PreferedDualStackNodeIPs(tt.preferIPv6, tt.nodeIPs)
+			result := utilnet.PreferredDualStackNodeIPs(tt.preferIPv6, tt.nodeIPs)
 
 			assert.Equal(t, fmt.Sprintf("%v", tt.expected), fmt.Sprintf("%v", result))
 		})

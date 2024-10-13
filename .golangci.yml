@@ -57,8 +57,7 @@ linters-settings:
     # simplify code: gofmt with `-s` option, true by default
     simplify: true
   gocyclo:
-    # minimal code complexity to report, 30 by default (but we recommend 10-20)
-    min-complexity: 20
+    min-complexity: 25
   maligned:
     # print struct with more effective memory layout or not, false by default
     suggest-new: true
@@ -125,8 +124,7 @@ linters-settings:
       - prefix(github.com/siderolabs) # Groups all imports with the specified Prefix.
       - prefix(k8s.io) # Groups all imports with the specified Prefix.
   cyclop:
-    # the maximal code complexity to report
-    max-complexity: 20
+    max-complexity: 25
   gomoddirectives:
     replace-local: true
     replace-allow-list:

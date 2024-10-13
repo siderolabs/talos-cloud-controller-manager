@@ -98,7 +98,7 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 	klog.V(4).InfoS("instances.InstanceMetadata() called", "node", klog.KRef("", node.Name))
 
 	if providedIP, ok := node.ObjectMeta.Annotations[cloudproviderapi.AnnotationAlphaProvidedIPAddr]; ok {
-		nodeIPs := net.PreferedDualStackNodeIPs(i.c.config.Global.PreferIPv6, strings.Split(providedIP, ","))
+		nodeIPs := net.PreferredDualStackNodeIPs(i.c.config.Global.PreferIPv6, strings.Split(providedIP, ","))
 
 		var (
 			meta   *runtime.PlatformMetadataSpec

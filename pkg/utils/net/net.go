@@ -39,8 +39,8 @@ func SortedNodeIPs(nodeIP string, first, second []string) (res []string) {
 	return res
 }
 
-// PreferedDualStackNodeIPs returns the first IPv4 and IPv6 addresses from the list of IPs.
-func PreferedDualStackNodeIPs(preferIPv6 bool, ips []string) []string {
+// PreferredDualStackNodeIPs returns the first IPv4 and IPv6 addresses from the list of IPs.
+func PreferredDualStackNodeIPs(preferIPv6 bool, ips []string) []string {
 	var ipv6, ipv4 string
 
 	for _, ip := range ips {

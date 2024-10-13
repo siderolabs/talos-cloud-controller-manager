@@ -334,7 +334,7 @@ func (r *cloudAllocator) occupyPodCIDRs(ctx context.Context, node *v1.Node) erro
 		if !ok {
 			_, err := r.defineNodeGlobalCIDRs(ctx, node)
 			if err != nil {
-				return fmt.Errorf("failed to find a CIDRSet for node %s, CIDR %s", node.Name, cidr)
+				return fmt.Errorf("failed to find a CIDRSet for node %s, CIDR %s: %v", node.Name, cidr, err)
 			}
 		}
 	}
@@ -527,6 +527,7 @@ func (r *cloudAllocator) updateCIDRsAllocation(ctx context.Context, nodeName str
 	return err
 }
 
+// defineNodeGlobalCIDRs returns the global CIDR for the node.
 func (r *cloudAllocator) defineNodeGlobalCIDRs(ctx context.Context, node *v1.Node) (string, error) {
 	if node == nil {
 		return "", fmt.Errorf("node is nil")
@@ -566,14 +567,14 @@ func (r *cloudAllocator) defineNodeGlobalCIDRs(ctx context.Context, node *v1.Nod
 		}
 	}
 
-	_, cidr := talosclient.NodeCIDRDiscovery(ipv6, ifaces)
-	logger.V(4).Info("Node has IPv6 CIDRs", "node", klog.KObj(node), "CIDRs", cidr)
+	_, cidrs := talosclient.NodeCIDRDiscovery(ipv6, ifaces)
+	logger.V(4).Info("Node has IPv6 CIDRs", "node", klog.KObj(node), "CIDRs", cidrs)
 
-	if len(cidr) > 0 {
+	if len(cidrs) > 0 {
 		r.lock.Lock()
 		defer r.lock.Unlock()
 
-		subnets, err := netutils.ParseCIDRs(cidr)
+		subnets, err := netutils.ParseCIDRs(cidrs)
 		if err != nil {
 			return "", err
 		}
@@ -590,42 +591,60 @@ func (r *cloudAllocator) defineNodeGlobalCIDRs(ctx context.Context, node *v1.Nod
 			}
 		}
 
-		for _, subnet := range subnets {
-			logger.V(4).Info("Add IPv6 to CIDRSet", "node", klog.KObj(node), "CIDR", subnet)
+		for _, cidr := range cidrs {
+			mask := netip.MustParsePrefix(cidr).Bits()
+			if mask == 128 {
+				continue
+			}
 
-			err := r.addCIDRSet(subnet)
+			logger.V(4).Info("Add IPv6 to CIDRSet", "node", klog.KObj(node), "CIDR", cidr)
+
+			err := r.addCIDRSet(cidr)
 			if err != nil {
-				return "", err
+				return "", fmt.Errorf("error to add CIDRv6 to CIDRSet: %v", err)
 			}
 		}
 
-		return cidr[0], nil
+		return cidrs[0], nil
 	}
 
 	return "", nil
 }
 
-func (r *cloudAllocator) addCIDRSet(subnet *net.IPNet) error {
-	mask, _ := subnet.Mask.Size()
+// addCIDRSet adds a new CIDRSet-v6 to the allocator's tracked CIDR sets.
+func (r *cloudAllocator) addCIDRSet(cidr string) error {
+	subnet, err := netip.ParsePrefix(cidr)
+	if err != nil {
+		return err
+	}
+
+	mask := subnet.Bits()
 
 	switch {
 	case mask < 64:
-		mask = 64
+		subnet, err = subnet.Addr().Prefix(64)
+		if err != nil {
+			return err
+		}
+
+		mask = 80
 	case mask > 120:
 		return fmt.Errorf("CIDRv6 is too small: %v", subnet.String())
 	default:
 		mask += 16
 	}
 
-	cidrSet, err := cidrset.NewCIDRSet(subnet, mask)
+	ip := subnet.Masked().Addr()
+	net := &net.IPNet{IP: net.ParseIP(ip.String()), Mask: net.CIDRMask(subnet.Bits(), 128)}
+
+	cidrSet, err := cidrset.NewCIDRSet(net, mask)
 	if err != nil {
 		return err
 	}
 
-	k := netip.MustParsePrefix(subnet.String())
-
+	k := subnet.Masked()
 	if _, ok := r.cidrSets[k]; !ok {
-		r.cidrSets[netip.MustParsePrefix(subnet.String())] = cidrSet
+		r.cidrSets[k] = cidrSet
 	}
 
 	return nil

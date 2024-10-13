@@ -30,6 +30,7 @@ func ipDiscovery(nodeIPs []string, ifaces []network.AddressStatusSpec) (publicIP
 		if iface.LinkName == constants.KubeSpanLinkName ||
 			iface.LinkName == constants.SideroLinkName ||
 			iface.LinkName == "lo" ||
+			iface.LinkName == "cilium_host" ||
 			strings.HasPrefix(iface.LinkName, "dummy") {
 			continue
 		}
@@ -88,11 +89,11 @@ func getNodeAddresses(config *cloudConfig, platform string, features *transforme
 	}
 
 	addresses := []v1.NodeAddress{}
-	for _, ip := range utilsnet.PreferedDualStackNodeIPs(config.Global.PreferIPv6, nodeIPs) {
+	for _, ip := range utilsnet.PreferredDualStackNodeIPs(config.Global.PreferIPv6, nodeIPs) {
 		addresses = append(addresses, v1.NodeAddress{Type: v1.NodeInternalIP, Address: ip})
 	}
 
-	publicIPs = utilsnet.PreferedDualStackNodeIPs(config.Global.PreferIPv6, append(publicIPv4s, publicIPv6s...))
+	publicIPs = utilsnet.PreferredDualStackNodeIPs(config.Global.PreferIPv6, append(publicIPv4s, publicIPv6s...))
 	for _, ip := range publicIPs {
 		addresses = append(addresses, v1.NodeAddress{Type: v1.NodeExternalIP, Address: ip})
 	}

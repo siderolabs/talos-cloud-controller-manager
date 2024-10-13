@@ -171,6 +171,7 @@ func NodeIPDiscovery(nodeIPs []string, ifaces []network.AddressStatusSpec) (publ
 		if iface.LinkName == constants.KubeSpanLinkName ||
 			iface.LinkName == constants.SideroLinkName ||
 			iface.LinkName == "lo" ||
+			iface.LinkName == "cilium_host" ||
 			strings.HasPrefix(iface.LinkName, "dummy") {
 			continue
 		}
@@ -203,6 +204,7 @@ func NodeCIDRDiscovery(filterIPs []netip.Addr, ifaces []network.AddressStatusSpe
 		if iface.LinkName == constants.KubeSpanLinkName ||
 			iface.LinkName == constants.SideroLinkName ||
 			iface.LinkName == "lo" ||
+			iface.LinkName == "cilium_host" ||
 			strings.HasPrefix(iface.LinkName, "dummy") {
 			continue
 		}
@@ -210,7 +212,7 @@ func NodeCIDRDiscovery(filterIPs []netip.Addr, ifaces []network.AddressStatusSpe
 		ip := iface.Address.Addr()
 		if ip.IsGlobalUnicast() && !ip.IsPrivate() {
 			if len(filterIPs) == 0 || slices.Contains(filterIPs, ip) {
-				cidr := iface.Address.Masked().String()
+				cidr := iface.Address.String()
 
 				if ip.Is6() {
 					if slices.Contains(publicCIDRv6s, cidr) {
