@@ -1,4 +1,20 @@
 
+<a name="v1.8.1"></a>
+## [v1.8.1](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.8.0...v1.8.1) (2024-10-21)
+
+Welcome to the v1.8.1 release of Talos CCM!
+
+### Features
+- ipv6 small subnets
+- make kube-apiserver endpoint configurable
+
+### Changelog
+
+* 82009ed feat: ipv6 small subnets
+* 68d4133 fix: node allocator
+* db6c211 docs: install troubleshoot
+* 628a7b7 feat: make kube-apiserver endpoint configurable
+
 <a name="v1.8.0"></a>
 ## [v1.8.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.6.0...v1.8.0) (2024-09-24)
 

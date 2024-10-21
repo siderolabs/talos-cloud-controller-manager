@@ -136,7 +136,7 @@ daemonSet:
     # -- Kubernetes API server port. Default is 6443.
     servicePort: 6443
 
-# -- Deployment update stategy type.
+# -- Deployment update strategy type.
 # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#updating-a-deployment
 updateStrategy:
   type: RollingUpdate
