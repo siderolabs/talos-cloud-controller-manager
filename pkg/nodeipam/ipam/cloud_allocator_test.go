@@ -65,10 +65,22 @@ func TestAddCIDRSet(t *testing.T) {
 			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:cccc:0/112"),
 		},
 		{
-			name:                "CIDRv6 with mask size 120",
+			name:                "CIDRv6 with mask size 120, 256 pods",
 			cidr:                "2000::aaaa:bbbb:cccc:123/120",
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:cccc:100/120"),
+		},
+		{
+			name:                "CIDRv6 with mask size 122, 64 pods",
+			cidr:                "2000::aaaa:bbbb:cccc:123/122",
+			expectedSize:        1,
+			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:cccc:100/122"),
+		},
+		{
+			name:                "CIDRv6 with mask size 123, 32 pods",
+			cidr:                "2000::aaaa:bbbb:cccc:123/123",
+			expectedSize:        1,
+			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:cccc:120/123"),
 		},
 		{
 			name:          "CIDRv6 with mask size 124",
