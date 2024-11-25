@@ -83,7 +83,7 @@ func (c *Client) GetPodCIDRs(ctx context.Context) ([]string, error) {
 		return nil, err
 	}
 
-	return res.Spec().(*k8s.ControllerManagerConfigSpec).PodCIDRs, nil
+	return res.Spec().(*k8s.ControllerManagerConfigSpec).PodCIDRs, nil //nolint:errcheck
 }
 
 // GetServiceCIDRs returns the service CIDRs of the cluster.
@@ -93,7 +93,7 @@ func (c *Client) GetServiceCIDRs(ctx context.Context) ([]string, error) {
 		return nil, err
 	}
 
-	return res.Spec().(*k8s.ControllerManagerConfigSpec).ServiceCIDRs, nil
+	return res.Spec().(*k8s.ControllerManagerConfigSpec).ServiceCIDRs, nil //nolint:errcheck
 }
 
 // GetNodeIfaces returns the network interfaces of the node.
@@ -124,7 +124,9 @@ func (c *Client) GetNodeIfaces(ctx context.Context, nodeIP string) ([]network.Ad
 	iface := []network.AddressStatusSpec{}
 
 	for _, res := range resources.Items {
-		iface = append(iface, res.(*network.AddressStatus).TypedSpec().DeepCopy())
+		if addressStatus, ok := res.(*network.AddressStatus); ok {
+			iface = append(iface, addressStatus.TypedSpec().DeepCopy())
+		}
 	}
 
 	return iface, nil
@@ -155,7 +157,7 @@ func (c *Client) GetNodeMetadata(ctx context.Context, nodeIP string) (*runtime.P
 		return nil, fmt.Errorf("error get resources: %w", err)
 	}
 
-	meta := resources.Spec().(*runtime.PlatformMetadataSpec).DeepCopy()
+	meta := resources.Spec().(*runtime.PlatformMetadataSpec).DeepCopy() //nolint:errcheck
 
 	return &meta, nil
 }
