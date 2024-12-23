@@ -61,13 +61,6 @@ replicaCount: 2
 enabledControllers:
   - cloud-node
   - node-csr-approval
-
-# Deploy CCM only on control-plane nodes
-nodeSelector:
-  node-role.kubernetes.io/control-plane: ""
-tolerations:
-  - key: node-role.kubernetes.io/control-plane
-    effect: NoSchedule
 ```
 
 Deploy chart:
