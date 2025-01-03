@@ -11,5 +11,5 @@ keywords:
 maintainers:
   - name: sergelogvinov
     url: https://github.com/sergelogvinov
-version: 0.4.3
-appVersion: "v1.8.1"
+version: 0.4.4
+appVersion: "v1.9.0"

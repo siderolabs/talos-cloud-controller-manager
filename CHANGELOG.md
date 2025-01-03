@@ -1,4 +1,14 @@
 
+<a name="v1.9.0"></a>
+## [v1.9.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.8.1...v1.9.0) (2025-01-03)
+
+Welcome to the v1.9.0 release of Talos CCM!
+
+### Changelog
+
+* adb835e chore: bump deps
+* 2cfa7c6 chore: bump deps
+
 <a name="v1.8.1"></a>
 ## [v1.8.1](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.8.0...v1.8.1) (2024-10-21)
 
