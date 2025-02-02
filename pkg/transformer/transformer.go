@@ -12,7 +12,9 @@ import (
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/nodeselector"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
 
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/validation"
+	cloudproviderapi "k8s.io/cloud-provider/api"
 )
 
 // NodeTerm represents expressions and fields to transform node metadata.
@@ -21,14 +23,16 @@ type NodeTerm struct {
 	NodeSelector     []nodeselector.NodeSelectorTerm `yaml:"nodeSelector,omitempty"`
 	Annotations      map[string]string               `yaml:"annotations,omitempty"`
 	Labels           map[string]string               `yaml:"labels,omitempty"`
+	Taints           map[string]string               `yaml:"taints,omitempty"`
 	PlatformMetadata map[string]string               `yaml:"platformMetadata,omitempty"`
 	Features         NodeFeaturesFlagSpec            `yaml:"features,omitempty"`
 }
 
-// NodeSpec represents the transformed node specifcations.
+// NodeSpec represents the transformed node specifications.
 type NodeSpec struct {
 	Annotations map[string]string
 	Labels      map[string]string
+	Taints      map[string]string
 	Features    NodeFeaturesFlagSpec
 }
 
@@ -47,6 +51,7 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 	node := &NodeSpec{
 		Annotations: make(map[string]string),
 		Labels:      make(map[string]string),
+		Taints:      make(map[string]string),
 	}
 
 	if len(terms) == 0 {
@@ -66,7 +71,7 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 				for k, v := range term.Annotations {
 					t, err := executeTemplate(v, platformMetadata)
 					if err != nil {
-						return nil, fmt.Errorf("failed to transformer annotation '%q': %w", k, err)
+						return nil, fmt.Errorf("failed to transformer annotation %q: %w", k, err)
 					}
 
 					if errs := validation.IsQualifiedName(k); len(errs) != 0 {
@@ -81,7 +86,7 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 				for k, v := range term.Labels {
 					t, err := executeTemplate(v, platformMetadata)
 					if err != nil {
-						return nil, fmt.Errorf("failed to transformer label '%s': %w", k, err)
+						return nil, fmt.Errorf("failed to transformer label %q: %w", k, err)
 					}
 
 					if errs := validation.IsQualifiedName(k); len(errs) != 0 {
@@ -96,6 +101,25 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 				}
 			}
 
+			if term.Taints != nil {
+				for k, v := range term.Taints {
+					t, err := executeTemplate(v, platformMetadata)
+					if err != nil {
+						return nil, fmt.Errorf("failed to transformer label %q: %w", k, err)
+					}
+
+					if errs := isQualifiedTaintName(k); len(errs) != 0 {
+						return nil, fmt.Errorf("invalid taint name %q: %v", k, errs)
+					}
+
+					if errs := isValidTaintValue(t); len(errs) != 0 {
+						return nil, fmt.Errorf("invalid taint value %q: %v", v, errs)
+					}
+
+					node.Taints[k] = v
+				}
+			}
+
 			if term.PlatformMetadata != nil {
 				p := reflect.ValueOf(platformMetadata)
 				ps := p.Elem()
@@ -107,7 +131,7 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 
 					t, err := executeTemplate(v, platformMetadata)
 					if err != nil {
-						return nil, fmt.Errorf("failed to transformer platform metadata '%s': %w", k, err)
+						return nil, fmt.Errorf("failed to transformer platform metadata %q: %w", k, err)
 					}
 
 					f := ps.FieldByNameFunc(func(fieldName string) bool {
@@ -188,4 +212,48 @@ func metadataFromStruct(in *runtime.PlatformMetadataSpec) map[string]string {
 	}
 
 	return metadata
+}
+
+func isQualifiedTaintName(name string) []string {
+	var errs []string
+
+	if strings.Contains(name, "kubernetes.io/") {
+		switch name {
+		case v1.TaintNodeNotReady,
+			v1.TaintNodeUnreachable,
+			v1.TaintNodeMemoryPressure,
+			v1.TaintNodeDiskPressure,
+			v1.TaintNodeNetworkUnavailable,
+			v1.TaintNodePIDPressure:
+			errs = append(errs, "taint in kubernetes namespace")
+		case cloudproviderapi.TaintExternalCloudProvider,
+			cloudproviderapi.TaintNodeShutdown:
+			errs = append(errs, "taint in cloud provider namespace")
+		}
+	}
+
+	return errs
+}
+
+func isValidTaintValue(value string) (errs []string) {
+	effects := strings.Split(value, ":")
+	effect := effects[0]
+
+	if len(effects) > 2 {
+		errs = append(errs, "taint value is not valid")
+
+		return errs
+	}
+
+	if len(effects) == 2 {
+		effect = effects[1]
+	}
+
+	switch effect {
+	case "NoSchedule", "PreferNoSchedule", "NoExecute":
+	default:
+		errs = append(errs, fmt.Sprintf("taint effect %q is not valid", effect))
+	}
+
+	return errs
 }

@@ -144,6 +144,42 @@ func syncNodeAnnotations(ctx context.Context, c *client, node *v1.Node, nodeAnno
 	return nil
 }
 
+func syncNodeTaints(_ context.Context, c *client, node *v1.Node, nodeTaints map[string]string) error {
+	taints := []*v1.Taint{}
+
+	for k, v := range nodeTaints {
+		taint := v1.Taint{
+			Key: k,
+		}
+
+		value := strings.Split(v, ":")
+		if len(value) == 2 {
+			taint.Value = value[0]
+			taint.Effect = v1.TaintEffect(value[1])
+		} else {
+			taint.Effect = v1.TaintEffect(value[0])
+		}
+
+		taints = append(taints, &taint)
+	}
+
+	if err := cloudnodeutil.AddOrUpdateTaintOnNode(c.kclient, node.Name, taints...); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func taintExists(taints []v1.Taint, taintToFind *v1.Taint) bool {
+	for _, taint := range taints {
+		if taint.MatchTaint(taintToFind) {
+			return true
+		}
+	}
+
+	return false
+}
+
 func setTalosNodeLabels(c *client, meta *runtime.PlatformMetadataSpec) map[string]string {
 	if meta == nil {
 		return make(map[string]string)

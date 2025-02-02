@@ -67,7 +67,7 @@ transformations:
     # Match nodes by nodeSelector
     nodeSelector:
       - matchExpressions:
-          - key: platform           <- talos platfrom metadata variable case insensitive
+          - key: platform           <- talos platform metadata variable case insensitive
             operator: In            <- In, NotIn, Exists, DoesNotExist, Gt, Lt, Regexp
             values:                 <- array of string values
               - nocloud
@@ -80,7 +80,7 @@ transformations:
       # Or condition for nodeSelector
       - matchExpressions:
           # And condition for matchExpressions
-          - key: platform           <- talos platfrom metadata variable case insensitive
+          - key: platform           <- talos platform metadata variable case insensitive
             operator: In            <- In, NotIn, Exists, DoesNotExist, Gt, Lt, Regexp
             values:                 <- array of string values
               - metal
@@ -94,7 +94,7 @@ transformations:
             values:
               - ^web-cloud-.+$
 
-    # Add/replace annotations and labels for nodes that match the transformation
+    # Add/replace annotations, labels and taints for nodes that match the transformation
     annotations:
       # You can use the Go template to get the value of the platform metadata variable
       custom-annotation/instance-id: "id-{{ .InstanceID }}"
@@ -105,7 +105,10 @@ transformations:
       # Add label to the node, in this case, we add well-known node role label
       node-role.kubernetes.io/web: ""
       # Set capacity-type spot/on-demand
-      node-role.kubernetes.io/capacity-type: "{{ if .Spot }}spot{{ else }}on-demand{{ end }}",
+      node-role.kubernetes.io/capacity-type: "{{ if .Spot }}spot{{ else }}on-demand{{ end }}"
+    taints:
+      # Add taint to the node
+      node.cloudprovider.kubernetes.io/storage-type: "ceph:NoSchedule"
 
     # Replace platform metadata variables for nodes that match the transformation
     platformMetadata:
@@ -120,8 +123,8 @@ transformations:
 
 ### Transformations parameters
 
-* `nodeSelector` - a list of node selector requirements by platfrom metadata variable.
-  * `matchExpressions` - a list of node selector requirements by platfrom metadata variable.
+* `nodeSelector` - a list of node selector requirements by platform metadata variable.
+  * `matchExpressions` - a list of node selector requirements by platform metadata variable.
     * `key` - the key that the selector applies to, case `insensitive`.
     * `operator` - represents a key's relationship to a set of values. Supported operators are `In`, `NotIn`, `Exists`, `DoesNotExist`, `Gt`, `Lt`, `Regexp`.
     * `values` - an array of string values.
@@ -133,6 +136,10 @@ transformations:
 * `labels` - a map of key-value pairs to add to each node that matches the transformation.
   * `key` - the key of the label.
   * `value` - the value of the label. You can use the [Go template](https://golang.org/pkg/text/template/) to get the value of the platform metadata variable. Variables are case `sensitive`.
+
+* `taints` - a map of key-value pairs to add to each node that matches the transformation.
+  * `key` - the key of the taint. Can not be well-known taints name, like `node.kubernetes.io/unreachable`.
+  * `value` - the string in format '<value>:<effect>', '<effect>'. Effect can be `NoExecute`, `NoSchedule`, `PreferNoSchedule`.
 
 * `platformMetadata` - a map of key-value pairs to add to each node that matches the transformation.
   * `key` - the key of the platform metadata variable to replace.

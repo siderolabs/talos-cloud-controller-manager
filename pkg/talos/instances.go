@@ -164,7 +164,7 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			addresses = append(addresses, v1.NodeAddress{Type: v1.NodeInternalDNS, Address: meta.Hostname})
 		}
 
-		if nodeSpec.Annotations != nil {
+		if len(nodeSpec.Annotations) > 0 {
 			klog.V(4).InfoS("instances.InstanceMetadata() node has annotations", "node", klog.KRef("", node.Name), "annotations", nodeSpec.Annotations)
 
 			if err := syncNodeAnnotations(ctx, i.c, node, nodeSpec.Annotations); err != nil {
@@ -172,9 +172,19 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			}
 		}
 
+		if len(nodeSpec.Taints) > 0 {
+			klog.V(4).InfoS("instances.InstanceMetadata() node has taints", "node", klog.KRef("", node.Name), "taints", nodeSpec.Taints)
+
+			if taintExists(node.Spec.Taints, uninitializedTaint) {
+				if err := syncNodeTaints(ctx, i.c, node, nodeSpec.Taints); err != nil {
+					klog.ErrorS(err, "error updating taints for the node", "node", klog.KRef("", node.Name))
+				}
+			}
+		}
+
 		nodeLabels := setTalosNodeLabels(i.c, meta)
 
-		if nodeSpec.Labels != nil {
+		if len(nodeSpec.Labels) > 0 {
 			klog.V(4).InfoS("instances.InstanceMetadata() node has labels", "node", klog.KRef("", node.Name), "labels", nodeSpec.Labels)
 
 			maps.Copy(nodeLabels, nodeSpec.Labels)

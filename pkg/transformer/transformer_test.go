@@ -29,6 +29,7 @@ func TestMatch(t *testing.T) {
 			expected: &transformer.NodeSpec{
 				Annotations: map[string]string{},
 				Labels:      map[string]string{},
+				Taints:      map[string]string{},
 			},
 		},
 		{
@@ -50,6 +51,7 @@ func TestMatch(t *testing.T) {
 				Labels: map[string]string{
 					"my-label-name": "my-value",
 				},
+				Taints: map[string]string{},
 			},
 		},
 		{
@@ -76,6 +78,29 @@ func TestMatch(t *testing.T) {
 				Labels: map[string]string{
 					"my-label-name": "my-value",
 				},
+				Taints: map[string]string{},
+			},
+		},
+		{
+			name: "Transform taints",
+			terms: []transformer.NodeTerm{
+				{
+					Name: "my-transformer",
+					Taints: map[string]string{
+						"my-taint-name": "NoSchedule",
+					},
+				},
+			},
+			metadata: runtime.PlatformMetadataSpec{
+				Platform: "test-platform",
+				Hostname: "test-hostname",
+			},
+			expected: &transformer.NodeSpec{
+				Annotations: map[string]string{},
+				Labels:      map[string]string{},
+				Taints: map[string]string{
+					"my-taint-name": "NoSchedule",
+				},
 			},
 		},
 		{
@@ -92,7 +117,7 @@ func TestMatch(t *testing.T) {
 				Platform: "test-platform",
 				Hostname: "test-hostname",
 			},
-			expectedError: fmt.Errorf("failed to transformer label 'label-template': failed to parse template \"my-value-{{ .Spot\": template: transformer:1: unclosed action"),
+			expectedError: fmt.Errorf("failed to transformer label \"label-template\": failed to parse template \"my-value-{{ .Spot\": template: transformer:1: unclosed action"),
 		},
 		{
 			name: "Transform annotations with template",
@@ -113,6 +138,7 @@ func TestMatch(t *testing.T) {
 					"annotation-template": "my-value-test-platform",
 				},
 				Labels: map[string]string{},
+				Taints: map[string]string{},
 			},
 		},
 		{
@@ -134,6 +160,7 @@ func TestMatch(t *testing.T) {
 				Labels: map[string]string{
 					"label-template": "my-value-false-a",
 				},
+				Taints: map[string]string{},
 			},
 		},
 		{
@@ -159,6 +186,7 @@ func TestMatch(t *testing.T) {
 				Labels: map[string]string{
 					"karpenter.sh/capacity-type": "spot",
 				},
+				Taints: map[string]string{},
 			},
 			expectedMeta: &runtime.PlatformMetadataSpec{
 				Platform: "test-platform",
@@ -188,6 +216,7 @@ func TestMatch(t *testing.T) {
 			expected: &transformer.NodeSpec{
 				Annotations: map[string]string{},
 				Labels:      map[string]string{},
+				Taints:      map[string]string{},
 			},
 			expectedMeta: &runtime.PlatformMetadataSpec{
 				Platform:     "test-platform",
@@ -230,6 +259,7 @@ func TestMatch(t *testing.T) {
 				Labels: map[string]string{
 					"karpenter.sh/capacity-type": "spot",
 				},
+				Taints: map[string]string{},
 			},
 			expectedMeta: &runtime.PlatformMetadataSpec{
 				Platform: "test-platform",
@@ -252,6 +282,38 @@ func TestMatch(t *testing.T) {
 				Hostname: "test-hostname",
 			},
 			expectedError: fmt.Errorf("invalid label name \"-template\": [name part must consist of alphanumeric characters, '-', '_' or '.', and must start and end with an alphanumeric character (e.g. 'MyName',  or 'my.name',  or '123-abc', regex used for validation is '([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9]')]"), //nolint:lll
+		},
+		{
+			name: "Transform taint with bad name",
+			terms: []transformer.NodeTerm{
+				{
+					Name: "my-transformer",
+					Taints: map[string]string{
+						"node.kubernetes.io/pid-pressure": "my-value",
+					},
+				},
+			},
+			metadata: runtime.PlatformMetadataSpec{
+				Platform: "test-platform",
+				Hostname: "test-hostname",
+			},
+			expectedError: fmt.Errorf("invalid taint name \"node.kubernetes.io/pid-pressure\": [taint in kubernetes namespace]"), //nolint:lll
+		},
+		{
+			name: "Transform taint with bad value",
+			terms: []transformer.NodeTerm{
+				{
+					Name: "my-transformer",
+					Taints: map[string]string{
+						"node.cloudprovider.kubernetes.io/storage-type": "my-value:PleaseSchedule",
+					},
+				},
+			},
+			metadata: runtime.PlatformMetadataSpec{
+				Platform: "test-platform",
+				Hostname: "test-hostname",
+			},
+			expectedError: fmt.Errorf("invalid taint value \"my-value:PleaseSchedule\": [taint effect \"PleaseSchedule\" is not valid]"), //nolint:lll
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
