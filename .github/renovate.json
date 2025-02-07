@@ -1,0 +1,45 @@
+{
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "description": "THIS FILE WAS AUTOMATICALLY GENERATED, PLEASE DO NOT EDIT.",
+    "prHeader": "Update Request | Renovate Bot",
+    "extends": [
+        ":dependencyDashboard",
+        ":gitSignOff",
+        ":semanticCommitScopeDisabled",
+        "schedule:earlyMondays"
+    ],
+    "packageRules": [
+        {
+            "description": "Siderolabs Group",
+            "groupName": "siderolabs",
+            "matchPackagePatterns": [
+                "^github.com/siderolabs",
+                "^github.com/cosi-project"
+            ],
+            "group": {
+                "commitMessageTopic": "{{{groupName}}} group"
+            },
+            "matchUpdateTypes": [
+                "major",
+                "minor",
+                "patch"
+            ]
+        },
+        {
+            "description": "K8S Group",
+            "groupName": "kubernetes",
+            "matchPackagePatterns": [
+                "^k8s.io/"
+            ],
+            "group": {
+                "commitMessageTopic": "{{{groupName}}} group"
+            },
+            "matchUpdateTypes": [
+                "major",
+                "minor",
+                "patch"
+            ]
+        }
+    ],
+    "separateMajorMinor": false
+}

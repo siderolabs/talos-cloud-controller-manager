@@ -1,5 +1,4 @@
 ---
-
 # See https://docs.github.com/en/github/administering-a-repository/configuration-options-for-dependency-updates
 
 version: 2
@@ -14,7 +13,6 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "07:30"
-      timezone: "UTC"
 
   - package-ecosystem: "gomod"
     directory: "/"
@@ -26,7 +24,6 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "07:00"
-      timezone: "UTC"
     groups:
       k8s.io:
         patterns:
@@ -53,4 +50,3 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "07:00"
-      timezone: "UTC"
