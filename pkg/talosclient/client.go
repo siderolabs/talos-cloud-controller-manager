@@ -32,6 +32,7 @@ import (
 	talos "github.com/siderolabs/talos/pkg/machinery/client"
 	"github.com/siderolabs/talos/pkg/machinery/constants"
 	"github.com/siderolabs/talos/pkg/machinery/nethelpers"
+	"github.com/siderolabs/talos/pkg/machinery/resources/hardware"
 	"github.com/siderolabs/talos/pkg/machinery/resources/k8s"
 	"github.com/siderolabs/talos/pkg/machinery/resources/network"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
@@ -133,6 +134,8 @@ func (c *Client) GetNodeIfaces(ctx context.Context, nodeIP string) ([]network.Ad
 }
 
 // GetNodeMetadata returns the metadata of the node.
+//
+//nolint:dupl
 func (c *Client) GetNodeMetadata(ctx context.Context, nodeIP string) (*runtime.PlatformMetadataSpec, error) {
 	nodeCtx := talos.WithNode(ctx, nodeIP)
 
@@ -158,6 +161,38 @@ func (c *Client) GetNodeMetadata(ctx context.Context, nodeIP string) (*runtime.P
 	}
 
 	meta := resources.Spec().(*runtime.PlatformMetadataSpec).DeepCopy() //nolint:errcheck
+
+	return &meta, nil
+}
+
+// GetNodeSystemInfo returns the system information of the node.
+//
+//nolint:dupl
+func (c *Client) GetNodeSystemInfo(ctx context.Context, nodeIP string) (*hardware.SystemInformationSpec, error) {
+	nodeCtx := talos.WithNode(ctx, nodeIP)
+
+	var resources resource.Resource
+
+	err := retry.Constant(10*time.Second, retry.WithUnits(100*time.Millisecond)).Retry(func() error {
+		var getErr error
+
+		resources, getErr = c.talos.COSI.Get(nodeCtx, resource.NewMetadata(hardware.NamespaceName, hardware.SystemInformationType, hardware.SystemInformationID, resource.VersionUndefined))
+		if getErr != nil {
+			err := c.refreshTalosClient(ctx) //nolint:errcheck
+			if err != nil {
+				return retry.ExpectedError(err)
+			}
+
+			return getErr
+		}
+
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("error get resources: %w", err)
+	}
+
+	meta := resources.Spec().(*hardware.SystemInformationSpec).DeepCopy() //nolint:errcheck
 
 	return &meta, nil
 }

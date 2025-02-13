@@ -11,6 +11,7 @@ import (
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/transformer"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/net"
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/utils/platform"
+	"github.com/siderolabs/talos/pkg/machinery/resources/hardware"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
 
 	v1 "k8s.io/api/core/v1"
@@ -138,9 +139,20 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			}
 		}
 
-		mct := metrics.NewMetricContext("metadata")
+		var sysInfo *hardware.SystemInformationSpec
 
-		nodeSpec, err := transformer.TransformNode(i.c.config.Transformations, meta)
+		if len(i.c.config.Transformations) > 0 {
+			msys := metrics.NewMetricContext(hardware.SystemInformationID)
+
+			sysInfo, err = i.c.talos.GetNodeSystemInfo(ctx, nodeIP)
+			if msys.ObserveRequest(err) != nil {
+				return nil, fmt.Errorf("error getting system info from the node %s: %w", node.Name, err)
+			}
+		}
+
+		mct := metrics.NewMetricContext("transformer")
+
+		nodeSpec, err := transformer.TransformNode(i.c.config.Transformations, meta, sysInfo)
 		if mct.ObserveTransformer(err) != nil {
 			return nil, fmt.Errorf("error transforming node: %w", err)
 		}

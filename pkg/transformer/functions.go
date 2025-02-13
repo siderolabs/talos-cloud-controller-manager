@@ -26,6 +26,9 @@ var genericMap = map[string]interface{}{
 	// Encoding functions:
 	"b64enc": base64encode,
 	"b64dec": base64decode,
+
+	// String slice functions:
+	"getValue": getValue,
 }
 
 // GenericFuncMap returns a copy of the basic function map as a map[string]interface{}.
@@ -82,4 +85,16 @@ func base64decode(v string) (string, error) {
 	}
 
 	return string(data), nil
+}
+
+func getValue(source string, key string) string {
+	parts := strings.Split(source, ";")
+	for _, part := range parts {
+		kv := strings.Split(part, "=")
+		if kv[0] == key {
+			return kv[1]
+		}
+	}
+
+	return ""
 }

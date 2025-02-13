@@ -16,3 +16,14 @@ transformations:
       node-role.kubernetes.io/web: ""
     taints:
       node.cloudprovider.kubernetes.io/storage-type: "NoSchedule"
+
+  - name: nocloud
+    nodeSelector:
+      - matchExpressions:
+          - key: platform
+            operator: In
+            values:
+              - nocloud
+    platformMetadata:
+      InstanceType: "{{ .SKUNumber }}"
+      ProviderID: proxmox://region-1/{{ getValue .SerialNumber "i" }}

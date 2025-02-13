@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/nodeselector"
+	"github.com/siderolabs/talos/pkg/machinery/resources/hardware"
 	"github.com/siderolabs/talos/pkg/machinery/resources/runtime"
 
 	v1 "k8s.io/api/core/v1"
@@ -36,6 +37,11 @@ type NodeSpec struct {
 	Features    NodeFeaturesFlagSpec
 }
 
+type nodeTransformationValues struct {
+	runtime.PlatformMetadataSpec
+	hardware.SystemInformationSpec
+}
+
 // NodeFeaturesFlagSpec represents the node features flags.
 type NodeFeaturesFlagSpec struct {
 	// PublicIPDiscovery try to find public IP on the node
@@ -47,7 +53,7 @@ var prohibitedPlatformMetadataKeys = []string{"hostname", "platform"}
 // TransformNode transforms the node metadata based on the node transformation rules.
 //
 //nolint:gocyclo,cyclop
-func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataSpec) (*NodeSpec, error) {
+func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataSpec, sysinfo *hardware.SystemInformationSpec) (*NodeSpec, error) {
 	node := &NodeSpec{
 		Annotations: make(map[string]string),
 		Labels:      make(map[string]string),
@@ -58,7 +64,12 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 		return node, nil
 	}
 
-	metadata := metadataFromStruct(platformMetadata)
+	values := nodeTransformationValues{PlatformMetadataSpec: *platformMetadata}
+	if sysinfo != nil {
+		values.SystemInformationSpec = *sysinfo
+	}
+
+	metadata := mapFromStruct(platformMetadata)
 
 	for _, term := range terms {
 		match, err := nodeselector.Match(term.NodeSelector, metadata)
@@ -69,7 +80,7 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 		if match {
 			if term.Annotations != nil {
 				for k, v := range term.Annotations {
-					t, err := executeTemplate(v, platformMetadata)
+					t, err := executeTemplate(v, values)
 					if err != nil {
 						return nil, fmt.Errorf("failed to transformer annotation %q: %w", k, err)
 					}
@@ -84,7 +95,7 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 
 			if term.Labels != nil {
 				for k, v := range term.Labels {
-					t, err := executeTemplate(v, platformMetadata)
+					t, err := executeTemplate(v, values)
 					if err != nil {
 						return nil, fmt.Errorf("failed to transformer label %q: %w", k, err)
 					}
@@ -103,7 +114,7 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 
 			if term.Taints != nil {
 				for k, v := range term.Taints {
-					t, err := executeTemplate(v, platformMetadata)
+					t, err := executeTemplate(v, values)
 					if err != nil {
 						return nil, fmt.Errorf("failed to transformer label %q: %w", k, err)
 					}
@@ -129,7 +140,7 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 						continue
 					}
 
-					t, err := executeTemplate(v, platformMetadata)
+					t, err := executeTemplate(v, values)
 					if err != nil {
 						return nil, fmt.Errorf("failed to transformer platform metadata %q: %w", k, err)
 					}
@@ -170,7 +181,7 @@ func executeTemplate(tmpl string, data interface{}) (string, error) {
 	return buf.String(), nil
 }
 
-func metadataFromStruct(in *runtime.PlatformMetadataSpec) map[string]string {
+func mapFromStruct(in interface{}) map[string]string {
 	if in == nil {
 		return nil
 	}

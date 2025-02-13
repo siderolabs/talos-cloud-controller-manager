@@ -114,6 +114,10 @@ transformations:
     platformMetadata:
       Region: "{{ .Region }}-on-metal"
       Zone: "us-west-1f"
+      # SKUNumber is a system information variable "t2.micro"
+      InstanceType: "{{ .SKUNumber }}"
+      # UUID is a system information variable "e8e8c388-5812-4db0-87e2-ad1fee51a1c1"
+      ProviderID: "someproviderID:///{{ .UUID }}"
 
     # Features flags for nodes that match the transformation
     features:
@@ -182,7 +186,32 @@ type PlatformMetadataSpec struct {
 You can use the following command to get the platform metadata:
 
 ```bash
-talosctl get PlatformMetadatas.talos.dev -oyaml
+talosctl get PlatformMetadatas -oyaml
+```
+
+### System information variables
+
+Additionally you can use the system information variables in the transformations rules.
+
+Go struct for system information,
+original code: [system_information.go](https://github.com/siderolabs/talos/blob/main/pkg/machinery/resources/hardware/system_information.go)
+
+```go
+type SystemInformationSpec struct {
+	Manufacturer string `yaml:"manufacturer,omitempty" protobuf:"1"`
+	ProductName  string `yaml:"productName,omitempty" protobuf:"2"`
+	Version      string `yaml:"version,omitempty" protobuf:"3"`
+	SerialNumber string `yaml:"serialnumber,omitempty" protobuf:"4"`
+	UUID         string `yaml:"uuid,omitempty" protobuf:"5"`
+	WakeUpType   string `yaml:"wakeUpType,omitempty" protobuf:"6"`
+	SKUNumber    string `yaml:"skuNumber,omitempty" protobuf:"7"`
+}
+```
+
+You can use the following command to get the system information:
+
+```bash
+talosctl get SystemInformation -oyaml
 ```
 
 ### Transformations functions
@@ -276,4 +305,12 @@ You can use the following functions in the Go template:
 
   ```yaml
   {{ b64dec "aGVsbG8=" }} -> hello
+  ```
+
+#### String slice functions
+
+* `getValue` - the function to get the value from the map by key.
+
+  ```yaml
+  {{ getValue "ds=nocloud;i=1234" "i" }} -> 1234
   ```

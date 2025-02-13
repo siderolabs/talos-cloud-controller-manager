@@ -317,7 +317,7 @@ func TestMatch(t *testing.T) {
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			node, err := transformer.TransformNode(tt.terms, &tt.metadata)
+			node, err := transformer.TransformNode(tt.terms, &tt.metadata, nil)
 
 			if tt.expectedError != nil {
 				assert.NotNil(t, err)
