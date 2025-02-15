@@ -2,11 +2,17 @@ package transformer
 
 import (
 	"encoding/base64"
+	"reflect"
 	"regexp"
 	"strings"
 )
 
 var genericMap = map[string]interface{}{
+	"default":  defaultFunc,
+	"empty":    empty,
+	"coalesce": coalesce,
+	"ternary":  ternary,
+
 	// String functions:
 	"upper":      strings.ToUpper,
 	"lower":      strings.ToLower,
@@ -39,6 +45,44 @@ func GenericFuncMap() map[string]interface{} {
 	}
 
 	return gfm
+}
+
+// Source from https://github.com/Masterminds/sprig/blob/master/defaults.go with some modifications
+//
+// Checks whether `given` is set, and returns default if not set.
+func defaultFunc(d any, given ...any) any {
+	if empty(given) || empty(given[0]) {
+		return d
+	}
+
+	return given[0]
+}
+
+// empty returns true if the given value has the zero value for its type.
+func empty(given any) bool {
+	g := reflect.ValueOf(given)
+
+	return !g.IsValid() || g.IsZero()
+}
+
+// coalesce returns the first non-empty value.
+func coalesce(v ...any) any {
+	for _, val := range v {
+		if !empty(val) {
+			return val
+		}
+	}
+
+	return nil
+}
+
+// ternary returns the first value if the last value is true, otherwise returns the second value.
+func ternary(vt any, vf any, v bool) any {
+	if v {
+		return vt
+	}
+
+	return vf
 }
 
 func regexFindString(regex string, s string, n int) (string, error) {

@@ -25,5 +25,5 @@ transformations:
             values:
               - nocloud
     platformMetadata:
-      InstanceType: "{{ .SKUNumber }}"
-      ProviderID: proxmox://region-1/{{ getValue .SerialNumber "i" }}
+      InstanceType: "{{ coalesce .InstanceType .SKUNumber }}"
+      ProviderID: '{{ if .SerialNumber }}proxmox://region-1/{{ getValue .SerialNumber "i" }}{{ else }}{{ .ProviderID }}{{ end }}'
