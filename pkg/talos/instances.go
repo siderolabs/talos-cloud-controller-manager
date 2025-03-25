@@ -139,6 +139,10 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			}
 		}
 
+		if meta.Hostname == "" {
+			meta.Hostname = node.Name
+		}
+
 		var sysInfo *hardware.SystemInformationSpec
 
 		if len(i.c.config.Transformations) > 0 {
