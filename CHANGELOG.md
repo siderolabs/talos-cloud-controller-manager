@@ -1,4 +1,25 @@
 
+<a name="v1.9.1"></a>
+## [v1.9.1](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.9.0...v1.9.1) (2025-04-11)
+
+Welcome to the v1.9.1 release of Talos CCM!
+
+### Features
+- add special transformer func
+- add system information for transformer
+- renovate bot
+- add taints capabilities
+
+### Changelog
+
+* 470f45c chore: bump deps
+* 094360a fix: hostname in transformation rules
+* dc5bfc4 chore: bump deps
+* 2c0bd2f feat: add special transformer func
+* 5a31bb2 feat: add system information for transformer
+* 67f83c6 feat: renovate bot
+* 82c154a feat: add taints capabilities
+
 <a name="v1.9.0"></a>
 ## [v1.9.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.8.1...v1.9.0) (2025-01-03)
 
