@@ -42,7 +42,7 @@ func TestInstanceMetadata(t *testing.T) {
 
 	cfg := cloudConfig{}
 
-	ctx := context.Background()
+	ctx := t.Context()
 	client, err := newClient(ctx, &cfg)
 	assert.NoError(t, err)
 

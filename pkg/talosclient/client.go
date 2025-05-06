@@ -63,20 +63,6 @@ func New(ctx context.Context) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) refreshTalosClient(ctx context.Context) error {
-	if _, err := c.talos.Version(ctx); err != nil {
-		talos, err := New(ctx)
-		if err != nil {
-			return fmt.Errorf("failed to reinitialized talos client: %v", err)
-		}
-
-		c.talos.Close() //nolint:errcheck
-		c.talos = talos.talos
-	}
-
-	return nil
-}
-
 // GetPodCIDRs returns the pod CIDRs of the cluster.
 func (c *Client) GetPodCIDRs(ctx context.Context) ([]string, error) {
 	res, err := c.talos.COSI.Get(ctx, resource.NewMetadata(k8s.ControlPlaneNamespaceName, k8s.ControllerManagerConfigType, k8s.ControllerManagerID, resource.VersionUndefined))
@@ -200,6 +186,20 @@ func (c *Client) GetNodeSystemInfo(ctx context.Context, nodeIP string) (*hardwar
 // GetClusterName returns cluster name.
 func (c *Client) GetClusterName() string {
 	return c.talos.GetClusterName()
+}
+
+func (c *Client) refreshTalosClient(ctx context.Context) error {
+	if _, err := c.talos.Version(ctx); err != nil {
+		talos, err := New(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to reinitialized talos client: %v", err)
+		}
+
+		c.talos.Close() //nolint:errcheck
+		c.talos = talos.talos
+	}
+
+	return nil
 }
 
 // NodeIPDiscovery returns the public IPs of the node excluding the given IPs.

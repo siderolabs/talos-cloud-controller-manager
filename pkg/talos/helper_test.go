@@ -1,7 +1,6 @@
 package talos
 
 import (
-	"context"
 	"crypto/x509"
 	"fmt"
 	"maps"
@@ -216,7 +215,7 @@ func TestSyncNodeLabels(t *testing.T) {
 			},
 		},
 	}
-	ctx := context.Background()
+	ctx := t.Context()
 	nodes := &v1.NodeList{
 		Items: []v1.Node{
 			{
@@ -378,7 +377,7 @@ func TestSyncNodeLabels(t *testing.T) {
 }
 
 func TestCSRNodeChecks(t *testing.T) {
-	ctx := context.Background()
+	ctx := t.Context()
 	nodes := &v1.NodeList{
 		Items: []v1.Node{
 			{

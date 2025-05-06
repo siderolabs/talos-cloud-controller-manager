@@ -121,6 +121,7 @@ linters:
       - pkg/nodeipam/ipam/cidrset
       - cmd/talos-cloud-controller-manager/options/nodeipamcontroller.go
       - pkg/nodeipam/ipam/range_allocator.go
+      - pkg/nodeipam/ipam/cloud_allocator.go
 issues:
   max-issues-per-linter: 0
   max-same-issues: 0

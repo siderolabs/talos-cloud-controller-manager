@@ -249,7 +249,7 @@ func TestControllerReconcileCSR(t *testing.T) {
 		t.Run(fmt.Sprint(testCase.msg), func(t *testing.T) {
 			t.Parallel()
 
-			valid, err := controller.Reconcile(context.Background(), &testCase.csr)
+			valid, err := controller.Reconcile(t.Context(), &testCase.csr)
 
 			if testCase.expectedError != nil {
 				assert.NotNil(t, err)
