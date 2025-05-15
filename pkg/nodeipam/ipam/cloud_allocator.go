@@ -631,7 +631,17 @@ func (r *cloudAllocator) addCIDRSet(cidr string) error {
 	case mask > 123:
 		return fmt.Errorf("CIDRv6 is too small: %v", subnet.String())
 	case mask > 119:
+		// Use /120 mask or less as is, only one node can be assigned
 		break
+	case mask > 118:
+		// Use /120 mask, only two nodes can be assigned
+		mask += 1
+	case mask > 111:
+		mask += 2
+	case mask > 105:
+		mask += 4
+	case mask > 99:
+		mask += 8
 	default:
 		mask += 16
 	}
