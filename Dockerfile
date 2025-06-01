@@ -1,4 +1,4 @@
-# syntax = docker/dockerfile:1.12
+# syntax = docker/dockerfile:1.16
 ########################################
 
 FROM --platform=${BUILDPLATFORM} golang:1.24-alpine AS builder
