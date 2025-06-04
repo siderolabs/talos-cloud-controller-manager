@@ -40,6 +40,7 @@ type NodeSpec struct {
 type nodeTransformationValues struct {
 	runtime.PlatformMetadataSpec
 	hardware.SystemInformationSpec
+	TalosVersion string
 }
 
 // NodeFeaturesFlagSpec represents the node features flags.
@@ -53,7 +54,7 @@ var prohibitedPlatformMetadataKeys = []string{"hostname", "platform"}
 // TransformNode transforms the node metadata based on the node transformation rules.
 //
 //nolint:gocyclo,cyclop
-func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataSpec, sysinfo *hardware.SystemInformationSpec) (*NodeSpec, error) {
+func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataSpec, sysinfo *hardware.SystemInformationSpec, version string) (*NodeSpec, error) {
 	node := &NodeSpec{
 		Annotations: make(map[string]string),
 		Labels:      make(map[string]string),
@@ -67,6 +68,10 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 	values := nodeTransformationValues{PlatformMetadataSpec: *platformMetadata}
 	if sysinfo != nil {
 		values.SystemInformationSpec = *sysinfo
+	}
+
+	if version != "" {
+		values.TalosVersion = version
 	}
 
 	metadata := mapFromStruct(platformMetadata)

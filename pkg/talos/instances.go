@@ -143,9 +143,17 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 			meta.Hostname = node.Name
 		}
 
-		var sysInfo *hardware.SystemInformationSpec
+		var (
+			sysInfo      *hardware.SystemInformationSpec
+			talosVersion string
+		)
 
 		if len(i.c.config.Transformations) > 0 {
+			talosVersion, err = i.c.talos.GetNodeVersion(ctx, nodeIP)
+			if err != nil {
+				return nil, fmt.Errorf("error getting node version from the node %s: %w", node.Name, err)
+			}
+
 			msys := metrics.NewMetricContext(hardware.SystemInformationID)
 
 			sysInfo, err = i.c.talos.GetNodeSystemInfo(ctx, nodeIP)
@@ -156,7 +164,7 @@ func (i *instances) InstanceMetadata(ctx context.Context, node *v1.Node) (*cloud
 
 		mct := metrics.NewMetricContext("transformer")
 
-		nodeSpec, err := transformer.TransformNode(i.c.config.Transformations, meta, sysInfo)
+		nodeSpec, err := transformer.TransformNode(i.c.config.Transformations, meta, sysInfo, talosVersion)
 		if mct.ObserveTransformer(err) != nil {
 			return nil, fmt.Errorf("error transforming node: %w", err)
 		}
