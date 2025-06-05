@@ -1,4 +1,15 @@
 
+<a name="v0.10.0"></a>
+## [v0.10.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.9.1...v0.10.0) (2025-06-01)
+
+Welcome to the v0.10.0 release of Talos CCM!
+
+### Changelog
+
+* 01d526d chore: bump deps
+* 95b4c4b fix: ipv6 small subnets
+* a0e8169 chore: bump deps
+
 <a name="v1.9.1"></a>
 ## [v1.9.1](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.9.0...v1.9.1) (2025-04-11)
 
