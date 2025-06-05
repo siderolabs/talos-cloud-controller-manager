@@ -8,7 +8,7 @@ metadata:
     helm.sh/chart: talos-cloud-controller-manager-0.4.6
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/version: "v1.10.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 ---
@@ -21,7 +21,7 @@ metadata:
     helm.sh/chart: talos-cloud-controller-manager-0.4.6
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/version: "v1.10.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 spec:
@@ -37,7 +37,7 @@ metadata:
     helm.sh/chart: talos-cloud-controller-manager-0.4.6
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/version: "v1.10.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 data:
@@ -53,7 +53,7 @@ metadata:
     helm.sh/chart: talos-cloud-controller-manager-0.4.6
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/version: "v1.10.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -161,7 +161,7 @@ metadata:
     helm.sh/chart: talos-cloud-controller-manager-0.4.6
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/version: "v1.10.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 spec:
@@ -185,7 +185,7 @@ metadata:
     helm.sh/chart: talos-cloud-controller-manager-0.4.6
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v0.10.0"
+    app.kubernetes.io/version: "v1.10.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 spec:
@@ -219,7 +219,7 @@ spec:
               - ALL
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/siderolabs/talos-cloud-controller-manager:v0.10.0"
+          image: "ghcr.io/siderolabs/talos-cloud-controller-manager:v1.10.0"
           imagePullPolicy: IfNotPresent
           command: ["/talos-cloud-controller-manager"]
           args:
