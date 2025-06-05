@@ -356,7 +356,7 @@ func TestSyncNodeLabels(t *testing.T) {
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			nodeSpec, err := transformer.TransformNode(client.config.Transformations, tt.meta, nil)
+			nodeSpec, err := transformer.TransformNode(client.config.Transformations, tt.meta, nil, "")
 			assert.NoError(t, err)
 
 			labels := setTalosNodeLabels(client, tt.meta)

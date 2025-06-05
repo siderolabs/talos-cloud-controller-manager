@@ -242,6 +242,7 @@ func TestMatch(t *testing.T) {
 					Name: "second-rule",
 					Labels: map[string]string{
 						"karpenter.sh/capacity-type": "spot",
+						"squat.ai/enabled":           `{{ if semverCompare "=> 1.8" .TalosVersion }}true{{ end }}`,
 					},
 					PlatformMetadata: map[string]string{
 						"Zone": "us-west1",
@@ -258,6 +259,7 @@ func TestMatch(t *testing.T) {
 				},
 				Labels: map[string]string{
 					"karpenter.sh/capacity-type": "spot",
+					"squat.ai/enabled":           "true",
 				},
 				Taints: map[string]string{},
 			},
@@ -317,7 +319,7 @@ func TestMatch(t *testing.T) {
 		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
-			node, err := transformer.TransformNode(tt.terms, &tt.metadata, nil)
+			node, err := transformer.TransformNode(tt.terms, &tt.metadata, nil, "1.8.0")
 
 			if tt.expectedError != nil {
 				assert.NotNil(t, err)

@@ -214,6 +214,23 @@ You can use the following command to get the system information:
 talosctl get SystemInformation -oyaml
 ```
 
+### Talos OS Version
+
+You can use Talos OS version in the transformations rules.
+
+Example of rule:
+
+```yaml
+- labels:
+    talos.os/containerd: "`{{ if semverCompare "=> 1.8" .TalosVersion }}2{{else}}1{{ end }}`"
+```
+
+Follow command help you to get the Talos OS version:
+
+```bash
+talosctl get version -oyaml
+```
+
 ### Transformations functions
 
 You can use the following functions in the Go template:
@@ -293,6 +310,33 @@ You can use the following functions in the Go template:
   ```yaml
   {{ hasSuffix "hello" "lo" }} -> true
   ```
+
+#### SemVer functions
+
+* `semver` - the function to return the version of Talos OS in the format `major.minor.patch`.
+
+  ```yaml
+  {{ (semver "1.9.0").Major }} -> 1
+  {{ (semver "1.9.0").Minor }} -> 9
+  {{ (semver "1.9.0").Patch }} -> 0
+  ```
+
+* `semverCompare` - the function to compare the version with the specified constraint.
+
+  ```yaml
+  {{ semverCompare ">= 1.8" "1.9.0" }} -> true
+  ```
+
+  Compare example:
+
+  * `~1.2.3` is equivalent to >= 1.2.3, < 1.3.0
+  * `~1` is equivalent to >= 1, < 2
+  * `~2.3` is equivalent to >= 2.3, < 2.4
+  * `~1.2.x` is equivalent to >= 1.2.0, < 1.3.0
+  * `~1.x` is equivalent to >= 1, < 2
+  * `1.2.x` is equivalent to >= 1.2.0, < 1.3.0
+  * `>= 1.2.x` is equivalent to >= 1.2.0
+  * `<= 2.x` is equivalent to < 3
 
 #### Encoding functions
 

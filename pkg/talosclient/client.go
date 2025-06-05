@@ -183,6 +183,38 @@ func (c *Client) GetNodeSystemInfo(ctx context.Context, nodeIP string) (*hardwar
 	return &meta, nil
 }
 
+// GetNodeVersion returns the talos version of the node.
+//
+//nolint:dupl
+func (c *Client) GetNodeVersion(ctx context.Context, nodeIP string) (string, error) {
+	nodeCtx := talos.WithNode(ctx, nodeIP)
+
+	var resources resource.Resource
+
+	err := retry.Constant(10*time.Second, retry.WithUnits(100*time.Millisecond)).Retry(func() error {
+		var getErr error
+
+		resources, getErr = c.talos.COSI.Get(nodeCtx, resource.NewMetadata(runtime.NamespaceName, runtime.VersionType, "version", resource.VersionUndefined))
+		if getErr != nil {
+			err := c.refreshTalosClient(ctx) //nolint:errcheck
+			if err != nil {
+				return retry.ExpectedError(err)
+			}
+
+			return getErr
+		}
+
+		return nil
+	})
+	if err != nil {
+		return "", fmt.Errorf("error get resources: %w", err)
+	}
+
+	meta := resources.Spec().(*runtime.VersionSpec).DeepCopy() //nolint:errcheck
+
+	return strings.TrimPrefix(meta.Version, "v"), nil
+}
+
 // GetClusterName returns cluster name.
 func (c *Client) GetClusterName() string {
 	return c.talos.GetClusterName()
