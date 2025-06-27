@@ -152,8 +152,12 @@ images-cosign:
 	@cosign sign --yes $(COSING_ARGS) --recursive $(IMAGE):$(TAG)
 
 .PHONY: images
-images:
+images: ## Build images
 	@docker buildx build $(BUILD_ARGS) \
 		--build-arg VERSION="$(VERSION)" \
 		-t $(IMAGE):$(TAG) \
 		-f Dockerfile .
+
+.PHONY: images-checks
+images-checks: images
+	trivy image --exit-code 1 --ignore-unfixed --severity HIGH,CRITICAL --no-progress $(IMAGE):$(TAG)
