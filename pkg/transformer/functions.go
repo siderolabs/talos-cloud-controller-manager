@@ -5,6 +5,8 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+
+	sm "github.com/Masterminds/semver/v3"
 )
 
 var genericMap = map[string]interface{}{
@@ -28,6 +30,10 @@ var genericMap = map[string]interface{}{
 	"contains":  func(substr string, str string) bool { return strings.Contains(str, substr) },
 	"hasPrefix": func(substr string, str string) bool { return strings.HasPrefix(str, substr) },
 	"hasSuffix": func(substr string, str string) bool { return strings.HasSuffix(str, substr) },
+
+	// SemVer:
+	"semver":        semver,
+	"semverCompare": semverCompare,
 
 	// Encoding functions:
 	"b64enc": base64encode,
@@ -116,6 +122,24 @@ func regexFind(regex string, s string) (string, error) {
 	}
 
 	return r.FindString(s), nil
+}
+
+func semverCompare(constraint, version string) (bool, error) {
+	c, err := sm.NewConstraint(constraint)
+	if err != nil {
+		return false, err
+	}
+
+	v, err := sm.NewVersion(version)
+	if err != nil {
+		return false, err
+	}
+
+	return c.Check(v), nil
+}
+
+func semver(version string) (*sm.Version, error) {
+	return sm.NewVersion(version)
 }
 
 func base64encode(v string) string {
