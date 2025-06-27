@@ -25,10 +25,18 @@ jobs:
         run: |
           echo "TAG=v${GITHUB_HEAD_REF:8}" >> "$GITHUB_ENV"
 
-      - name: Helm docs
+      - name: Install helm docs
         uses: gabe565/setup-helm-docs-action@v1
 
-      - name: Generate
+      - name: Generate docs
         run: make docs
-      - name: Check
+      - name: Check release artifacts
         run: git diff --exit-code
+
+      - name: Install git-chglog
+        uses: craicoverflow/install-git-chglog@v1
+      - name: Check changelog
+        run: |
+          git tag ${TAG}
+          make release-update
+          git diff --exit-code

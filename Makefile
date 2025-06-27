@@ -131,6 +131,11 @@ docs:
 	helm-docs charts/talos-cloud-controller-manager
 
 release-update:
+	@echo "Updating release version $(VERSION) -> $(TAG)"
+	@if [ "$$(printf '%s\n' $(VERSION) $(TAG) | sort -V | tail -n1)" = "$(VERSION)" ] && [ "$(VERSION)" != "$(TAG)" ]; then \
+		echo "New version $(TAG) is not higher than $(VERSION)"; \
+		exit 1; \
+	fi
 	git-chglog --config hack/chglog-config.yml -o CHANGELOG.md
 
 ############
