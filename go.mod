@@ -1,22 +1,22 @@
 module github.com/siderolabs/talos-cloud-controller-manager
 
-go 1.24.4
+go 1.24.5
 
 require (
-	github.com/cosi-project/runtime v0.10.6
+	github.com/cosi-project/runtime v1.10.7
 	github.com/siderolabs/go-retry v0.3.3
 	github.com/siderolabs/net v0.4.0
-	github.com/siderolabs/talos/pkg/machinery v1.10.4
-	github.com/spf13/pflag v1.0.6
+	github.com/siderolabs/talos/pkg/machinery v1.10.5
+	github.com/spf13/pflag v1.0.7
 	github.com/stretchr/testify v1.10.0
 	gopkg.in/yaml.v3 v3.0.1
 	gotest.tools/v3 v3.5.2
-	k8s.io/api v0.33.2
-	k8s.io/apimachinery v0.33.2
-	k8s.io/client-go v0.33.2
-	k8s.io/cloud-provider v0.33.2
-	k8s.io/component-base v0.33.2
-	k8s.io/controller-manager v0.33.2
+	k8s.io/api v0.33.3
+	k8s.io/apimachinery v0.33.3
+	k8s.io/client-go v0.33.3
+	k8s.io/cloud-provider v0.33.3
+	k8s.io/component-base v0.33.3
+	k8s.io/controller-manager v0.33.3
 	k8s.io/klog/v2 v2.130.1
 	k8s.io/utils v0.0.0-20250604170112-4c0f3b243397
 )
@@ -129,9 +129,9 @@ require (
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
-	k8s.io/apiserver v0.33.2 // indirect
-	k8s.io/component-helpers v0.33.2 // indirect
-	k8s.io/kms v0.33.2 // indirect
+	k8s.io/apiserver v0.33.3 // indirect
+	k8s.io/component-helpers v0.33.3 // indirect
+	k8s.io/kms v0.33.3 // indirect
 	k8s.io/kube-openapi v0.0.0-20250626183228-af0a60a813f8 // indirect
 	sigs.k8s.io/apiserver-network-proxy/konnectivity-client v0.33.0 // indirect
 	sigs.k8s.io/json v0.0.0-20241014173422-cfa47c3a1cc8 // indirect

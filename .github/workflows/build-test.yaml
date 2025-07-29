@@ -37,7 +37,7 @@ jobs:
       - name: Lint
         uses: golangci/golangci-lint-action@v8
         with:
-          version: v2.1.6
+          version: v2.3.0
           args: --timeout=5m --config=.golangci.yml
       - name: Build
         timeout-minutes: 10

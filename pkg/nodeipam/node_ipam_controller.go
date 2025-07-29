@@ -127,8 +127,10 @@ func (nc *Controller) Run(ctx context.Context) {
 
 	// Start event processing pipeline.
 	nc.eventBroadcaster.StartStructuredLogging(3)
+
 	nc.eventBroadcaster.StartRecordingToSink(&v1core.EventSinkImpl{Interface: nc.kubeClient.CoreV1().Events("")})
 	defer nc.eventBroadcaster.Shutdown()
+
 	klog.FromContext(ctx).Info("Starting ipam controller")
 	defer klog.FromContext(ctx).Info("Shutting down ipam controller")
 
@@ -137,6 +139,7 @@ func (nc *Controller) Run(ctx context.Context) {
 	}
 
 	go nc.cidrAllocator.Run(ctx)
+
 	<-ctx.Done()
 }
 
@@ -144,5 +147,6 @@ func (nc *Controller) Run(ctx context.Context) {
 func (nc *Controller) RunWithMetrics(ctx context.Context, controllerManagerMetrics *controllersmetrics.ControllerManagerMetrics) {
 	controllerManagerMetrics.ControllerStarted("nodeipam")
 	defer controllerManagerMetrics.ControllerStopped("nodeipam")
+
 	nc.Run(ctx)
 }

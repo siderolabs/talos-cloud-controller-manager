@@ -58,6 +58,7 @@ func PatchNodeCIDR(c clientset.Interface, node types.NodeName, cidr string) erro
 			PodCIDR: cidr,
 		},
 	}
+
 	patchBytes, err := json.Marshal(&patch)
 	if err != nil {
 		return fmt.Errorf("failed to json.Marshal CIDR: %w", err)
@@ -66,6 +67,7 @@ func PatchNodeCIDR(c clientset.Interface, node types.NodeName, cidr string) erro
 	if _, err := c.CoreV1().Nodes().Patch(context.TODO(), string(node), types.StrategicMergePatchType, patchBytes, metav1.PatchOptions{}); err != nil {
 		return fmt.Errorf("failed to patch node CIDR: %w", err)
 	}
+
 	return nil
 }
 
@@ -84,10 +86,13 @@ func PatchNodeCIDRs(ctx context.Context, c clientset.Interface, node types.NodeN
 	if err != nil {
 		return fmt.Errorf("failed to json.Marshal CIDR: %v", err)
 	}
+
 	klog.FromContext(ctx).V(4).Info("cidrs patch bytes", "patchBytes", string(patchBytes))
+
 	if _, err := c.CoreV1().Nodes().Patch(ctx, string(node), types.StrategicMergePatchType, patchBytes, metav1.PatchOptions{}); err != nil {
 		return fmt.Errorf("failed to patch node CIDR: %v", err)
 	}
+
 	return nil
 }
 
@@ -102,18 +107,24 @@ func SetNodeCondition(c clientset.Interface, node types.NodeName, condition v1.N
 				},
 			},
 		}
+
 		patchBytes, err := json.Marshal(&patch)
 		if err != nil {
 			return nil, err
 		}
+
 		return patchBytes, nil
 	}
+
 	condition.LastHeartbeatTime = metav1.NewTime(time.Now())
+
 	patch, err := generatePatch(condition)
 	if err != nil {
 		return nil
 	}
+
 	_, err = c.CoreV1().Nodes().PatchStatus(context.TODO(), string(node), patch)
+
 	return err
 }
 
