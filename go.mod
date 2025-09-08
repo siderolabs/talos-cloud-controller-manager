@@ -3,7 +3,7 @@ module github.com/siderolabs/talos-cloud-controller-manager
 go 1.25.0
 
 require (
-	github.com/cosi-project/runtime v1.10.7
+	github.com/cosi-project/runtime v1.11.0
 	github.com/siderolabs/go-retry v0.3.3
 	github.com/siderolabs/net v0.4.0
 	github.com/siderolabs/talos/pkg/machinery v1.11.0
