@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"os"
 
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/talosclient"
 
@@ -16,8 +17,11 @@ import (
 const (
 	// ProviderName is the name of the Talos provider.
 	ProviderName = "talos"
+
 	// ServiceAccountName is the service account name used in kube-system namespace.
 	ServiceAccountName = "talos-cloud-controller-manager"
+	// ServiceAccountNameEnv is the environment variable for the service account name.
+	ServiceAccountNameEnv = "SERVICE_ACCOUNT"
 
 	// ClusterNameNodeLabel is the node label of cluster-name.
 	ClusterNameNodeLabel = "node.cloudprovider.kubernetes.io/clustername"
@@ -90,7 +94,12 @@ func newClient(ctx context.Context, config *cloudConfig) (*client, error) {
 // to perform housekeeping or run custom controllers specific to the cloud provider.
 // Any tasks started here should be cleaned up when the stop channel closes.
 func (c *Cloud) Initialize(clientBuilder cloudprovider.ControllerClientBuilder, stop <-chan struct{}) {
-	c.client.kclient = clientBuilder.ClientOrDie(ServiceAccountName)
+	serviceAccountName := os.Getenv(ServiceAccountNameEnv)
+	if serviceAccountName == "" {
+		serviceAccountName = ServiceAccountName
+	}
+
+	c.client.kclient = clientBuilder.ClientOrDie(serviceAccountName)
 
 	klog.InfoS("clientset initialized")
 

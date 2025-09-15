@@ -61,8 +61,12 @@ spec:
           {{- with .Values.extraArgs }}
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.daemonSet.enabled }}
           env:
+            - name: SERVICE_ACCOUNT
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.serviceAccountName
+          {{- if .Values.daemonSet.enabled }}
             - name: TALOS_ENDPOINTS
               valueFrom:
                 fieldRef:

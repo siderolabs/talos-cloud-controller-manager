@@ -62,10 +62,15 @@ func main() {
 		Constructor: nodeIpamController.startNodeIpamControllerWrapper,
 	}
 
+	serviceAccountName := os.Getenv(talos.ServiceAccountNameEnv)
+	if serviceAccountName == "" {
+		serviceAccountName = talos.ServiceAccountName
+	}
+
 	nodeCSRApproval := nodeCSRApprovalController{}
 	controllerInitializers[kcmnames.CertificateSigningRequestApprovingController] = app.ControllerInitFuncConstructor{
 		InitContext: app.ControllerInitContext{
-			ClientName: talos.ServiceAccountName,
+			ClientName: serviceAccountName,
 		},
 		Constructor: nodeCSRApproval.startNodeCSRApprovalControllerWrapper,
 	}
