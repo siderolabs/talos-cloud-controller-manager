@@ -21,6 +21,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"reflect"
+	"slices"
 	"strings"
 
 	certificatesv1 "k8s.io/api/certificates/v1"
@@ -47,6 +48,7 @@ var (
 	errOrganizationNotSystemNodes = fmt.Errorf("subject organization is not system:nodes")
 	errCommonNameNotSystemNode    = fmt.Errorf("subject common name does not begin with system:node: ")
 	errDNSOrIPSANRequired         = fmt.Errorf("DNS or IP subjectAltName is required")
+	errDNSNameNotAllowed          = fmt.Errorf("DNS subjectAltNames are not allowed")
 	errEmailSANNotAllowed         = fmt.Errorf("email subjectAltNames are not allowed")
 	errURISANNotAllowed           = fmt.Errorf("URI subjectAltNames are not allowed")
 	errKeyUsageMismatch           = fmt.Errorf("key usage does not match")
@@ -61,6 +63,12 @@ var kubeletServingRequiredUsages = []certificatesv1.KeyUsage{
 func validateKubeletServingCSR(req *x509.CertificateRequest, keyUsages []certificatesv1.KeyUsage) error {
 	if len(req.DNSNames) == 0 && len(req.IPAddresses) == 0 {
 		return errDNSOrIPSANRequired
+	}
+
+	if slices.ContainsFunc(req.DNSNames, func(name string) bool {
+		return name == "kubernetes" || strings.HasPrefix(name, "kubernetes.")
+	}) {
+		return errDNSNameNotAllowed
 	}
 
 	if len(req.EmailAddresses) > 0 {

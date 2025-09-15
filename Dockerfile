@@ -1,7 +1,7 @@
-# syntax = docker/dockerfile:1.16
+# syntax = docker/dockerfile:1.18
 ########################################
 
-FROM --platform=${BUILDPLATFORM} golang:1.25-alpine AS builder
+FROM --platform=${BUILDPLATFORM} golang:1.25.1-alpine3.22 AS builder
 RUN apk update && apk add --no-cache make
 WORKDIR /src
 

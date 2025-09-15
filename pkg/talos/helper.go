@@ -102,7 +102,7 @@ func getNodeAddresses(config *cloudConfig, platform string, features *transforme
 }
 
 func syncNodeAnnotations(ctx context.Context, c *client, node *v1.Node, nodeAnnotations map[string]string) error {
-	nodeAnnotationsOrig := node.ObjectMeta.Labels
+	nodeAnnotationsOrig := node.ObjectMeta.Annotations
 	annotationsToUpdate := map[string]string{}
 
 	for k, v := range nodeAnnotations {

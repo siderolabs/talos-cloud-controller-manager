@@ -42,8 +42,6 @@ func TestParseCSRValid(t *testing.T) {
 	}
 
 	for _, testCase := range tests {
-		testCase := testCase
-
 		t.Run(fmt.Sprint(testCase.msg), func(t *testing.T) {
 			t.Parallel()
 
@@ -127,8 +125,6 @@ func TestValidateKubeletServingCSRValid(t *testing.T) {
 	}
 
 	for _, testCase := range tests {
-		testCase := testCase
-
 		t.Run(fmt.Sprint(testCase.msg), func(t *testing.T) {
 			t.Parallel()
 
@@ -167,6 +163,30 @@ func TestValidateKubeletServingCSRInvalid(t *testing.T) {
 			},
 			keyUsages:     usages,
 			expectedError: errDNSOrIPSANRequired,
+		},
+		{
+			msg: "Invalid DNSNames",
+			x509cr: x509.CertificateRequest{
+				Subject: pkix.Name{
+					CommonName:   cname,
+					Organization: []string{org},
+				},
+				DNSNames: []string{"kubernetes"},
+			},
+			keyUsages:     usages,
+			expectedError: errDNSNameNotAllowed,
+		},
+		{
+			msg: "Invalid DNSNames long form",
+			x509cr: x509.CertificateRequest{
+				Subject: pkix.Name{
+					CommonName:   cname,
+					Organization: []string{org},
+				},
+				DNSNames: []string{"kubernetes.default.svc"},
+			},
+			keyUsages:     usages,
+			expectedError: errDNSNameNotAllowed,
 		},
 		{
 			msg: "Invalid Organization",
@@ -258,8 +278,6 @@ func TestValidateKubeletServingCSRInvalid(t *testing.T) {
 	}
 
 	for _, testCase := range tests {
-		testCase := testCase
-
 		t.Run(fmt.Sprint(testCase.msg), func(t *testing.T) {
 			t.Parallel()
 
