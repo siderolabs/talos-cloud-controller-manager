@@ -1,4 +1,16 @@
 
+<a name="v1.11.0"></a>
+## [v1.11.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.10.1...v1.11.0) (2025-09-17)
+
+Welcome to the v1.11.0 release of Talos CCM!
+
+### Changelog
+
+* 7509491 fix: csr dns name check
+* 4b4c758 fix: service account name
+* 4402b31 chore: bump deps
+* 9c000cf chore: bump deps
+
 <a name="v1.10.1"></a>
 ## [v1.10.1](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.10.0...v1.10.1) (2025-06-27)
 
