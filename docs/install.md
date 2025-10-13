@@ -14,7 +14,7 @@ machine:
       rotate-server-certificates: true
 ```
 
-On the control-plane you need to allow [API access feature](https://www.talos.dev/v1.2/reference/configuration/#featuresconfig):
+On the control-plane you need to allow [API access feature](https://docs.siderolabs.com/kubernetes-guides/advanced-guides/talos-api-access-from-k8s#talos-api-access-from-kubernetes):
 
 ```yaml
 # Talos machine config
