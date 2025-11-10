@@ -19,7 +19,7 @@ jobs:
         run: git fetch --prune --unshallow
 
       - name: Install chart-testing tools
-        uses: helm/chart-testing-action@v2.7.0
+        uses: helm/chart-testing-action@v2.8.0
 
       - name: Run helm chart linter
         run: ct --config hack/ct.yml lint
