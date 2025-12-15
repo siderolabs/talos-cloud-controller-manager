@@ -1,5 +1,5 @@
 // Package net includes common net functions.
-package net
+package net //nolint:revive
 
 import (
 	"net/netip"

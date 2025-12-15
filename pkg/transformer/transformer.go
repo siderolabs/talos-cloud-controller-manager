@@ -167,7 +167,7 @@ func TransformNode(terms []NodeTerm, platformMetadata *runtime.PlatformMetadataS
 	return node, nil
 }
 
-func executeTemplate(tmpl string, data interface{}) (string, error) {
+func executeTemplate(tmpl string, data any) (string, error) {
 	t, err := template.New("transformer").Funcs(GenericFuncMap()).Parse(tmpl)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse template %q: %w", tmpl, err)
@@ -181,7 +181,7 @@ func executeTemplate(tmpl string, data interface{}) (string, error) {
 	return buf.String(), nil
 }
 
-func mapFromStruct(in interface{}) map[string]string {
+func mapFromStruct(in any) map[string]string {
 	if in == nil {
 		return nil
 	}

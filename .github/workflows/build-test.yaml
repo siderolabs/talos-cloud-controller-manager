@@ -24,7 +24,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Unshallow
         run: git fetch --prune --unshallow
 
@@ -35,9 +35,9 @@ jobs:
           go-version-file: 'go.mod'
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
-          version: v2.4.0
+          version: v2.7.2
           args: --timeout=5m --config=.golangci.yml
       - name: Build
         timeout-minutes: 10

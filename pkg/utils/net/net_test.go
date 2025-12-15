@@ -39,8 +39,6 @@ func TestFilterLocalNetIPs(t *testing.T) {
 			expected: "[]",
 		},
 	} {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -95,8 +93,6 @@ func TestSortedNodeIPs(t *testing.T) {
 			expected: "[1.1.1.1 2000:123:123::9b87:57a7:38bf:6c71]",
 		},
 	} {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 
@@ -141,8 +137,6 @@ func TestPreferredDualStackNodeIPs(t *testing.T) {
 			expected:   []string{"fd00::1", "192.168.0.1"},
 		},
 	} {
-		tt := tt
-
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()
 

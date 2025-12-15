@@ -2,12 +2,13 @@ package transformer
 
 import (
 	"encoding/base64"
+	"maps"
 	"reflect"
 	"regexp"
 	"strings"
 )
 
-var genericMap = map[string]interface{}{
+var genericMap = map[string]any{
 	"default":  defaultFunc,
 	"empty":    empty,
 	"coalesce": coalesce,
@@ -37,12 +38,10 @@ var genericMap = map[string]interface{}{
 	"getValue": getValue,
 }
 
-// GenericFuncMap returns a copy of the basic function map as a map[string]interface{}.
-func GenericFuncMap() map[string]interface{} {
-	gfm := make(map[string]interface{}, len(genericMap))
-	for k, v := range genericMap {
-		gfm[k] = v
-	}
+// GenericFuncMap returns a copy of the basic function map as a map[string]any.
+func GenericFuncMap() map[string]any {
+	gfm := make(map[string]any, len(genericMap))
+	maps.Copy(gfm, genericMap)
 
 	return gfm
 }
@@ -132,8 +131,7 @@ func base64decode(v string) (string, error) {
 }
 
 func getValue(source string, key string) string {
-	parts := strings.Split(source, ";")
-	for _, part := range parts {
+	for part := range strings.SplitSeq(source, ";") {
 		kv := strings.Split(part, "=")
 		if kv[0] == key {
 			return kv[1]

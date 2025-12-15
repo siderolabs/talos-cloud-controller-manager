@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"maps"
 	"strings"
 
 	"github.com/siderolabs/talos-cloud-controller-manager/pkg/metrics"
@@ -122,9 +123,7 @@ func syncNodeAnnotations(ctx context.Context, c *client, node *v1.Node, nodeAnno
 			newNode.Annotations = make(map[string]string)
 		}
 
-		for k, v := range annotationsToUpdate {
-			newNode.Annotations[k] = v
-		}
+		maps.Copy(newNode.Annotations, annotationsToUpdate)
 
 		newData, err := json.Marshal(newNode)
 		if err != nil {

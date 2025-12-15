@@ -78,6 +78,7 @@ func main() {
 	app.ControllersDisabledByDefault.Insert(kcmnames.NodeLifecycleController)
 	app.ControllersDisabledByDefault.Insert(kcmnames.NodeIpamController)
 	app.ControllersDisabledByDefault.Insert(kcmnames.CertificateSigningRequestApprovingController)
+
 	controllerAliases["nodeipam"] = kcmnames.NodeIpamController
 	controllerAliases["node-csr-approval"] = kcmnames.CertificateSigningRequestApprovingController
 

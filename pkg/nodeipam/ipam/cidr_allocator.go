@@ -14,7 +14,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package ipam implement IPAM for node CIDR range allocation.
 package ipam // copy from kubernetes/pkg/controller/nodeipam/ipam/cidr_allocator.go
 
 import (
