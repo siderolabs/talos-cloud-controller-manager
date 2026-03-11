@@ -1,5 +1,11 @@
 blank_issues_enabled: false
 contact_links:
   - name: Question
+    url: https://github.com/siderolabs/talos-cloud-controller-manager/discussions
+    about: Ask a question about Talos Cloud Controller Manager.
+  - name: Community
     url: https://taloscommunity.slack.com
-    about: Ask a question. Get your invite by visiting https://slack.dev.talos-systems.io.
+    about: Join the community. (Not an official support channel.) Get your invite by visiting https://inviter.co/sidero-labs-community.
+  - name: Get Enterprise Support
+    url: https://www.siderolabs.com/support/
+    about: Get commercial support from the Sidero Labs team, with SLAs for every issue.

@@ -65,8 +65,8 @@ See [Install](docs/install.md) for installation instructions.
 
 ## Community
 
-- Slack: Join our [slack channel](https://slack.dev.talos-systems.io)
 - Support: Questions, bugs, feature requests [GitHub Discussions](https://github.com/siderolabs/talos-cloud-controller-manager/discussions)
+- Slack: Join our [slack channel](https://taloscommunity.slack.com/). Request access via [inviter.co](https://inviter.co/sidero-labs-community).
 - Forum: [community](https://groups.google.com/a/SideroLabs.com/forum/#!forum/community)
 - Twitter: [@SideroLabs](https://twitter.com/SideroLabs)
 - Email: [info@SideroLabs.com](mailto:info@SideroLabs.com)
