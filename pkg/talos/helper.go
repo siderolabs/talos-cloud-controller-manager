@@ -89,7 +89,7 @@ func getNodeAddresses(config *cloudConfig, platform string, features *transforme
 		publicIPv6s = append(publicIPv6s, ipv6...)
 	}
 
-	addresses := []v1.NodeAddress{}
+	addresses := make([]v1.NodeAddress, 0, len(nodeIPs))
 	for _, ip := range utilsnet.PreferredDualStackNodeIPs(config.Global.PreferIPv6, nodeIPs) {
 		addresses = append(addresses, v1.NodeAddress{Type: v1.NodeInternalIP, Address: ip})
 	}
@@ -144,7 +144,7 @@ func syncNodeAnnotations(ctx context.Context, c *client, node *v1.Node, nodeAnno
 }
 
 func syncNodeTaints(_ context.Context, c *client, node *v1.Node, nodeTaints map[string]string) error {
-	taints := []*v1.Taint{}
+	taints := make([]*v1.Taint, 0, len(nodeTaints))
 
 	for k, v := range nodeTaints {
 		taint := v1.Taint{

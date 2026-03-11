@@ -119,6 +119,7 @@ func listNodes(ctx context.Context, kubeClient clientset.Interface) (*v1.NodeLis
 	// controller manager to restart.
 	if pollErr := wait.PollUntilContextTimeout(ctx, nodePollInterval, apiserverStartupGracePeriod, true, func(ctx context.Context) (bool, error) {
 		var err error
+
 		nodeList, err = kubeClient.CoreV1().Nodes().List(ctx, metav1.ListOptions{
 			FieldSelector: fields.Everything().String(),
 			LabelSelector: labels.Everything().String(),
