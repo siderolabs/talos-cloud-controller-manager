@@ -101,14 +101,14 @@ securityContext:
 
 service:
   # -- Service HTTPS port to expose controller.
-  port: 50258
+  port: 10458
   # -- Container HTTPS port.
-  containerPort: 50258
+  containerPort: 10458
   # -- Additional custom annotations for Service.
   annotations: {}
     # prometheus.io/scrape: "true"
     # prometheus.io/scheme: "https"
-    # prometheus.io/port: "50258"
+    # prometheus.io/port: "10458"
 
 # -- Resource requests and limits.
 # ref: http://kubernetes.io/docs/user-guide/compute-resources/

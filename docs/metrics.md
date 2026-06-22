@@ -4,14 +4,14 @@ This document is a reflection of the current state of the exposed metrics of the
 
 ## Gather metrics from talos-cloud-controller-manager
 
-By default, the Talos CCM exposes metrics on the `https://localhost:50258/metrics` endpoint.
+By default, the Talos CCM exposes metrics on the `https://localhost:10458/metrics` endpoint.
 
 Enabling the metrics is done by setting the `--secure-port` and the `--authorization-always-allow-paths` flag to allow access to the `/metrics` endpoint.
 
 ```yaml
 talos-cloud-controller-manager
   --authorization-always-allow-paths="/metrics"
-  --secure-port=50258
+  --secure-port=10458
 ```
 
 ### Helm chart values
@@ -20,11 +20,11 @@ The following values can be set in the Helm chart to expose the metrics of the T
 
 ```yaml
 service:
-  containerPort: 50258
+  containerPort: 10458
   annotations:
     prometheus.io/scrape: "true"
     prometheus.io/scheme: "https"
-    prometheus.io/port: "50258"
+    prometheus.io/port: "10458"
 ```
 
 ## Metrics exposed by the CCM
