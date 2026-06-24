@@ -55,8 +55,8 @@ linters:
     - thelper
     - varnamelen
     - wrapcheck
-    # - nlreturn
     - wsl
+    - gomodguard
 
     # temporarily disabled linters
     - copyloopvar
@@ -118,6 +118,11 @@ linters:
       local-variables-are-used: false
 
   exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - dupl
+          - goconst
     paths:
       # copied from kubernetes repo
       - pkg/names

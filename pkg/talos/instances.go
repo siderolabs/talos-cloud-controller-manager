@@ -73,8 +73,11 @@ func (i *instances) InstanceExists(_ context.Context, node *v1.Node) (bool, erro
 	}
 
 	if notReady {
-		if node.Labels[ClusterNodePlatformLabel] == "gcp" &&
-			node.Labels[ClusterNodeLifeCycleLabel] == "spot" {
+		// In the GCP cloud provider, Spot instances receive a new local IPs after they are preempted.
+		// To ensure that the node properties are updated correctly,
+		// node resource must be deleted, so that it can be recreated with the new information
+		if node.Labels[ClusterNodePlatformLabel] == "gcp" && // nolint:goconst
+			node.Labels[ClusterNodeLifeCycleLabel] == ClusterNodeLifeCycleLabelSpot {
 			return false, nil
 		}
 	}

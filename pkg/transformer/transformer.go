@@ -189,7 +189,7 @@ func mapFromStruct(in any) map[string]string {
 	metadata := make(map[string]string)
 
 	v := reflect.ValueOf(in)
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		v = v.Elem()
 	}
 

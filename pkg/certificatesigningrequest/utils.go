@@ -79,11 +79,11 @@ func validateKubeletServingCSR(req *x509.CertificateRequest, keyUsages []certifi
 		return errURISANNotAllowed
 	}
 
-	if !reflect.DeepEqual([]string{"system:nodes"}, req.Subject.Organization) {
+	if !reflect.DeepEqual([]string{"system:nodes"}, req.Subject.Organization) { //nolint:goconst
 		return errOrganizationNotSystemNodes
 	}
 
-	if !strings.HasPrefix(req.Subject.CommonName, "system:node:") {
+	if !strings.HasPrefix(req.Subject.CommonName, "system:node:") { //nolint:goconst
 		return errCommonNameNotSystemNode
 	}
 

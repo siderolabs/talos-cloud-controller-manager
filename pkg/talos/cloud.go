@@ -29,6 +29,8 @@ const (
 	ClusterNodePlatformLabel = "node.cloudprovider.kubernetes.io/platform"
 	// ClusterNodeLifeCycleLabel is a life cycle type of compute node.
 	ClusterNodeLifeCycleLabel = "node.cloudprovider.kubernetes.io/lifecycle"
+	// ClusterNodeLifeCycleLabelSpot is a lifecycle type of compute node for spot instances.
+	ClusterNodeLifeCycleLabelSpot = "spot"
 )
 
 // Cloud is an implementation of cloudprovider interface for Talos CCM.

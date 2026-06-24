@@ -9,13 +9,13 @@ jobs:
   build-publish:
     name: "Check release docs"
     runs-on: ubuntu-24.04
-    if:  startsWith(github.head_ref, 'release-')
+    if: startsWith(github.head_ref, 'release-')
     permissions:
       contents: read
       packages: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - name: Unshallow
         run: git fetch --prune --unshallow
 
@@ -26,7 +26,7 @@ jobs:
           echo "TAG=v${GITHUB_HEAD_REF:8}" >> "$GITHUB_ENV"
 
       - name: Install helm docs
-        uses: gabe565/setup-helm-docs-action@v1
+        uses: gabe565/setup-helm-docs-action@d5c35bdc9133cfbea3b671acadf50a29029e87c2 # v1.0.4
 
       - name: Generate docs
         run: make docs
@@ -34,7 +34,7 @@ jobs:
         run: git diff --exit-code
 
       - name: Install git-chglog
-        uses: craicoverflow/install-git-chglog@v1
+        uses: craicoverflow/install-git-chglog@557908f99a44c534a5ca43308966a047fad98ba7 # v1.0.0
       - name: Check changelog
         run: |
           git tag ${TAG}

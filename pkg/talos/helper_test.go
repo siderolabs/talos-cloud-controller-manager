@@ -322,7 +322,7 @@ func TestSyncNodeLabels(t *testing.T) {
 					Labels: map[string]string{
 						ClusterNameNodeLabel:      "test-cluster",
 						ClusterNodePlatformLabel:  "metal",
-						ClusterNodeLifeCycleLabel: "spot",
+						ClusterNodeLifeCycleLabel: ClusterNodeLifeCycleLabelSpot,
 					},
 				},
 			},

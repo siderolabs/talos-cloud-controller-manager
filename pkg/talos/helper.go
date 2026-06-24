@@ -63,11 +63,11 @@ func getNodeAddresses(config *cloudConfig, platform string, features *transforme
 
 	switch platform {
 	// Those platforms don't expose public IPs information in metadata
-	case "nocloud", "metal", "openstack", "oracle":
+	case "nocloud", "metal", "openstack", "oracle": // nolint:goconst
 		publicIPv4s, publicIPv6s = ipDiscovery(nodeIPs, ifaces)
 	default:
 		for _, iface := range ifaces {
-			if iface.LinkName == "external" {
+			if iface.LinkName == "external" { // nolint:goconst
 				ip := iface.Address.Addr()
 
 				if slices.Contains(nodeIPs, ip.String()) {
@@ -191,7 +191,7 @@ func setTalosNodeLabels(c *client, meta *runtime.PlatformMetadataSpec) map[strin
 	}
 
 	if meta.Spot {
-		labels[ClusterNodeLifeCycleLabel] = "spot"
+		labels[ClusterNodeLifeCycleLabel] = ClusterNodeLifeCycleLabelSpot
 	}
 
 	clusterName := c.config.Global.ClusterName
