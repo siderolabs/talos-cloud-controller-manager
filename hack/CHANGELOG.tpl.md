@@ -4,6 +4,11 @@
 
 Welcome to the {{ .Tag.Name }} release of Talos CCM!
 
+{{ if eq .Tag.Name "v1.13.0" }}### Breaking Changes
+
+* The default Prometheus metrics port has been changed from 50258 to 10458.
+
+{{ end -}}
 {{ range .CommitGroups -}}
 ### {{ .Title }}
 {{ range .Commits -}}

@@ -1,6 +1,6 @@
 # talos-cloud-controller-manager
 
-![Version: 0.5.4](https://img.shields.io/badge/Version-0.5.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.12.0](https://img.shields.io/badge/AppVersion-v1.12.0-informational?style=flat-square)
+![Version: 0.5.5](https://img.shields.io/badge/Version-0.5.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.13.0](https://img.shields.io/badge/AppVersion-v1.13.0-informational?style=flat-square)
 
 Talos Cloud Controller Manager Helm Chart
 
@@ -91,8 +91,8 @@ helm upgrade -i --namespace=kube-system -f talos-ccm.yaml \
 | resources | object | `{"requests":{"cpu":"10m","memory":"64Mi"}}` | Resource requests and limits. ref: http://kubernetes.io/docs/user-guide/compute-resources/ |
 | securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"seccompProfile":{"type":"RuntimeDefault"}}` | Container Security Context. ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod |
 | service.annotations | object | `{}` | Additional custom annotations for Service. |
-| service.containerPort | int | `50258` | Container HTTPS port. |
-| service.port | int | `50258` | Service HTTPS port to expose controller. |
+| service.containerPort | int | `10458` | Container HTTPS port. |
+| service.port | int | `10458` | Service HTTPS port to expose controller. |
 | serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Pods Service Account. ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account. |
 | serviceAccount.create | bool | `true` | Specifies whether a service account should be created. |

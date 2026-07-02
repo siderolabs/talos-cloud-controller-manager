@@ -5,10 +5,10 @@ kind: ServiceAccount
 metadata:
   name: talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.5.4
+    helm.sh/chart: talos-cloud-controller-manager-0.5.5
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v1.12.0"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 ---
@@ -18,10 +18,10 @@ kind: ServiceAccount
 metadata:
   name: talos-cloud-controller-manager-talos-secrets
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.5.4
+    helm.sh/chart: talos-cloud-controller-manager-0.5.5
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v1.12.0"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 spec:
@@ -34,10 +34,10 @@ kind: ConfigMap
 metadata:
   name: talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.5.4
+    helm.sh/chart: talos-cloud-controller-manager-0.5.5
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v1.12.0"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 data:
@@ -50,10 +50,10 @@ kind: ClusterRole
 metadata:
   name: system:talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.5.4
+    helm.sh/chart: talos-cloud-controller-manager-0.5.5
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v1.12.0"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -158,10 +158,10 @@ kind: Service
 metadata:
   name: talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.5.4
+    helm.sh/chart: talos-cloud-controller-manager-0.5.5
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v1.12.0"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 spec:
@@ -169,8 +169,8 @@ spec:
   type: ClusterIP
   ports:
     - name: metrics
-      port: 50258
-      targetPort: 50258
+      port: 10458
+      targetPort: 10458
       protocol: TCP
   selector:
         app.kubernetes.io/name: talos-cloud-controller-manager
@@ -182,10 +182,10 @@ kind: Deployment
 metadata:
   name: talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.5.4
+    helm.sh/chart: talos-cloud-controller-manager-0.5.5
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v1.12.0"
+    app.kubernetes.io/version: "v1.13.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 spec:
@@ -199,7 +199,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: de968f7be86b0b38929ae8bf8b66cdba2b6275765502cd3d962ee54f8f8d181a
+        checksum/config: 6aba55b0d907dab28e5e30a1d7d75eaf6763ed06d3168ec99b19769a2356598a
       labels:
         app.kubernetes.io/name: talos-cloud-controller-manager
         app.kubernetes.io/instance: talos-cloud-controller-manager
@@ -221,7 +221,7 @@ spec:
               - ALL
             seccompProfile:
               type: RuntimeDefault
-          image: "ghcr.io/siderolabs/talos-cloud-controller-manager:v1.12.0"
+          image: "ghcr.io/siderolabs/talos-cloud-controller-manager:v1.13.0"
           imagePullPolicy: IfNotPresent
           command: ["/talos-cloud-controller-manager"]
           args:
@@ -231,7 +231,7 @@ spec:
             - --controllers=cloud-node,node-csr-approval
             - --leader-elect-resource-name=cloud-controller-manager-talos
             - --use-service-account-credentials
-            - --secure-port=50258
+            - --secure-port=10458
             - --authorization-always-allow-paths=/healthz,/livez,/readyz,/metrics
           env:
             - name: SERVICE_ACCOUNT
@@ -240,7 +240,7 @@ spec:
                   fieldPath: spec.serviceAccountName
           ports:
             - name: metrics
-              containerPort: 50258
+              containerPort: 10458
               protocol: TCP
           livenessProbe:
             httpGet:

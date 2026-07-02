@@ -1,6 +1,22 @@
 
+<a name="v1.13.0"></a>
+## [v1.13.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.12.0...v1.13.0) (2026-07-02)
+
+Welcome to the v1.13.0 release of Talos CCM!
+
+### Breaking Changes
+
+* The default Prometheus metrics port has been changed from 50258 to 10458.
+
+### Changelog
+
+* 3e16ef5 chore: bump deps
+* eb3ad9e fix: move Talos CCM port outside ephemeral range
+* 68962e4 docs: align support contacts with talos repository
+* c5b64ca chore: bump deps
+
 <a name="v1.12.0"></a>
-## [v1.12.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.11.0...v1.12.0) (2026-01-09)
+## [v1.12.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.11.0...v1.12.0) (2026-01-08)
 
 Welcome to the v1.12.0 release of Talos CCM!
 
