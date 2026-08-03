@@ -1,12 +1,12 @@
 module github.com/siderolabs/talos-cloud-controller-manager
 
-go 1.26.4
+go 1.26.5
 
 require (
-	github.com/cosi-project/runtime v1.16.1
+	github.com/cosi-project/runtime v1.16.2
 	github.com/siderolabs/go-retry v0.3.3
 	github.com/siderolabs/net v0.4.0
-	github.com/siderolabs/talos/pkg/machinery v1.13.5
+	github.com/siderolabs/talos/pkg/machinery v1.13.7
 	github.com/spf13/pflag v1.0.10
 	github.com/stretchr/testify v1.11.1
 	gopkg.in/yaml.v3 v3.0.1
@@ -97,7 +97,7 @@ require (
 	github.com/ryanuber/go-glob v1.0.0 // indirect
 	github.com/sasha-s/go-deadlock v0.3.9 // indirect
 	github.com/siderolabs/crypto v0.6.5 // indirect
-	github.com/siderolabs/gen v0.8.6 // indirect
+	github.com/siderolabs/gen v0.8.7 // indirect
 	github.com/siderolabs/go-api-signature v0.3.13 // indirect
 	github.com/siderolabs/go-pointer v1.0.1 // indirect
 	github.com/siderolabs/protoenc v0.2.4 // indirect
