@@ -8,5 +8,8 @@ nodeSelector:
 
 logVerbosityLevel: 4
 
+globalConfig:
+  preferIPv6: true
+
 enabledControllers:
   - cloud-node

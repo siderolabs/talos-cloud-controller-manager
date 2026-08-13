@@ -8,6 +8,9 @@ metadata:
 data:
   ccm-config.yaml: |
     global:
+    {{- with .Values.globalConfig }}
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
   {{- with .Values.transformations }}
     transformations:
       {{- toYaml . | nindent 6 }}

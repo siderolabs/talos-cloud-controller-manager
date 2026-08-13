@@ -1,6 +1,6 @@
 # talos-cloud-controller-manager
 
-![Version: 0.5.5](https://img.shields.io/badge/Version-0.5.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.13.0](https://img.shields.io/badge/AppVersion-v1.13.0-informational?style=flat-square)
+![Version: 0.5.7](https://img.shields.io/badge/Version-0.5.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: v1.13.0](https://img.shields.io/badge/AppVersion-v1.13.0-informational?style=flat-square)
 
 Talos Cloud Controller Manager Helm Chart
 
@@ -77,6 +77,7 @@ helm upgrade -i --namespace=kube-system -f talos-ccm.yaml \
 | enabledControllers | list | `["cloud-node","node-csr-approval"]` | List of controllers should be enabled. Use '*' to enable all controllers. Support only `cloud-node, cloud-node-lifecycle, node-csr-approval, node-ipam-controller` controllers. |
 | extraArgs | list | `[]` | Any extra arguments for talos-cloud-controller-manager |
 | fullnameOverride | string | `""` | String to fully override deployment name. |
+| globalConfig | object | `{}` | Global cloud config options: clusterName, preferIPv6. |
 | image.pullPolicy | string | `"IfNotPresent"` | Pull policy: IfNotPresent or Always. |
 | image.repository | string | `"ghcr.io/siderolabs/talos-cloud-controller-manager"` | CCM image repository. |
 | image.tag | string | `""` | Overrides the image tag whose default is the chart appVersion. |

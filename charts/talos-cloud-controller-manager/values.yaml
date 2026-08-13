@@ -41,6 +41,9 @@ enabledControllers:
   - node-csr-approval
   # - node-ipam-controller
 
+# -- Global cloud config options: clusterName, preferIPv6.
+globalConfig: {}
+
 # -- List of node transformations.
 # Available matchExpressions key values: https://github.com/siderolabs/talos/blob/main/pkg/machinery/resources/runtime/platform_metadata.go#L28
 transformations: []
