@@ -13,6 +13,17 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "07:30"
+    cooldown:
+      default-days: 7
+    groups:
+      docker:
+        patterns:
+          - "docker/login-action"
+          - "docker/setup-buildx-action"
+      actions:
+        patterns:
+          - "actions/checkout"
+          - "actions/setup-go"
 
   - package-ecosystem: "gomod"
     directory: "/"
@@ -24,6 +35,8 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "07:00"
+    cooldown:
+      default-days: 7
     groups:
       k8s.io:
         patterns:
@@ -50,3 +63,5 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "07:00"
+    cooldown:
+      default-days: 7
