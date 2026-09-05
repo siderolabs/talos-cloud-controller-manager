@@ -1,0 +1,26 @@
+{
+    "$schema": "https://context7.com/schema/context7.json",
+    "url": "https://context7.com/siderolabs/talos-cloud-controller-manager",
+    "public_key": "pk_8S0pttRm2oyGHk5X3PAKV",
+    "projectTitle": "Talos Cloud Controller Manager",
+    "description": "Talos CCM is a project for managing nodes annotations, labels in different environments",
+    "excludeFolders": [
+        "cmd",
+        "hack",
+        "pkg",
+        "docs/cosign.md",
+        "docs/metrics.md",
+        "docs/rules.yaml",
+        "docs/deploy"
+    ],
+    "excludeFiles": [
+        "AGENTS.md",
+        "CLAUDE.md",
+        "GEMINI.md",
+        "CONTRIBUTING.md",
+        "CODE_OF_CONDUCT.md",
+        "CHANGELOG.md",
+        "LICENSE",
+        "OWNERS"
+    ]
+}
