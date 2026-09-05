@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package talosclient impelent talos client.
+// Package talosclient implements a client for interacting with Talos nodes and retrieving cluster information.
 package talosclient
 
 import (
@@ -208,7 +208,7 @@ func NodeIPDiscovery(nodeIPs []string, ifaces []network.AddressStatusSpec) (publ
 		if iface.LinkName == constants.KubeSpanLinkName ||
 			iface.LinkName == constants.SideroLinkName ||
 			iface.LinkName == "lo" ||
-			iface.LinkName == "cilium_host" ||
+			strings.HasPrefix(iface.LinkName, "cilium") ||
 			strings.HasPrefix(iface.LinkName, "dummy") {
 			continue
 		}
@@ -237,11 +237,13 @@ func NodeIPDiscovery(nodeIPs []string, ifaces []network.AddressStatusSpec) (publ
 
 // NodeCIDRDiscovery returns the public CIDRs of the node with the given filter IPs.
 func NodeCIDRDiscovery(filterIPs []netip.Addr, ifaces []network.AddressStatusSpec) (publicCIDRv4s, publicCIDRv6s []string) {
+	v6Prefixes := []netip.Prefix{}
+
 	for _, iface := range ifaces {
 		if iface.LinkName == constants.KubeSpanLinkName ||
 			iface.LinkName == constants.SideroLinkName ||
 			iface.LinkName == "lo" ||
-			iface.LinkName == "cilium_host" ||
+			strings.HasPrefix(iface.LinkName, "cilium") ||
 			strings.HasPrefix(iface.LinkName, "dummy") {
 			continue
 		}
@@ -249,23 +251,49 @@ func NodeCIDRDiscovery(filterIPs []netip.Addr, ifaces []network.AddressStatusSpe
 		ip := iface.Address.Addr()
 		if ip.IsGlobalUnicast() && !ip.IsPrivate() {
 			if len(filterIPs) == 0 || slices.Contains(filterIPs, ip) {
-				cidr := iface.Address.String()
-
 				if ip.Is6() {
-					if slices.Contains(publicCIDRv6s, cidr) {
+					prefix := iface.Address
+					if !prefix.IsValid() {
 						continue
 					}
 
-					// Prioritize permanent IPv6 addresses
-					if nethelpers.AddressFlag(iface.Flags)&nethelpers.AddressPermanent != 0 {
-						publicCIDRv6s = append([]string{cidr}, publicCIDRv6s...)
-					} else {
-						publicCIDRv6s = append(publicCIDRv6s, cidr)
+					if !slices.ContainsFunc(v6Prefixes, func(p netip.Prefix) bool { return p == prefix }) {
+						v6Prefixes = append(v6Prefixes, prefix)
 					}
 				} else {
-					publicCIDRv4s = append(publicCIDRv4s, cidr)
+					publicCIDRv4s = append(publicCIDRv4s, iface.Address.String())
 				}
 			}
+		}
+	}
+
+	// Sort IPv6 prefixes by mask: lower prefix (larger subnet) has higher priority.
+	slices.SortFunc(v6Prefixes, func(a, b netip.Prefix) int {
+		if a.Bits() != b.Bits() {
+			return a.Bits() - b.Bits()
+		}
+
+		return a.Addr().Compare(b.Addr())
+	})
+
+	// Drop any prefix that is contained within another (forget the smallest subnet).
+	for i, p := range v6Prefixes {
+		contained := false
+
+		for j, q := range v6Prefixes {
+			if i == j {
+				continue
+			}
+
+			if q.Bits() < p.Bits() && q.Contains(p.Addr()) {
+				contained = true
+
+				break
+			}
+		}
+
+		if !contained {
+			publicCIDRv6s = append(publicCIDRv6s, p.String())
 		}
 	}
 

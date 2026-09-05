@@ -148,7 +148,7 @@ func (s *CidrSet) indexToCIDRBlock(index int) *net.IPNet {
 }
 
 func (s *CidrSet) String() string {
-	return fmt.Sprintf("CIDRSet{used: %d}", s.allocatedCIDRs)
+	return fmt.Sprintf("CIDRSet{used: %d, max: %d}", s.allocatedCIDRs, s.maxCIDRs)
 }
 
 // AllocateNext allocates the next free CIDR range. This will set the range
