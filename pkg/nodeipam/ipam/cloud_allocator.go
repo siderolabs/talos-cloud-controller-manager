@@ -263,7 +263,7 @@ func (r *cloudAllocator) processNextNodeWorkItem(ctx context.Context) bool {
 		logger.Info("Successfully synced", "node", obj)
 
 		for k, cidrSet := range r.cidrSets {
-			logger.V(5).Info("IPAM status", "node", obj, "subnet", k.String(), "size", cidrSet.String())
+			logger.V(5).Info("IPAM status", "subnet", k.String(), "size", cidrSet.String())
 		}
 
 		return nil
@@ -355,6 +355,28 @@ func (r *cloudAllocator) occupyCIDR(cidr *net.IPNet) (bool, error) {
 	}
 
 	return false, nil
+}
+
+// occupyNodeIPs marks the node's own IPv6 addresses as occupied in the
+// matching CIDR set. This ensures a pod subnet that would include one of the
+// node's own addresses is never allocated to that node.
+func (r *cloudAllocator) occupyNodeIPs(addrs []netip.Addr) error {
+	for _, addr := range addrs {
+		if !addr.Is6() || addr.IsPrivate() {
+			continue
+		}
+
+		ip := net.ParseIP(addr.String())
+		if ip == nil {
+			continue
+		}
+
+		if _, err := r.occupyCIDR(&net.IPNet{IP: ip, Mask: net.CIDRMask(128, 128)}); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // WARNING: If you're adding any return calls or defer any more work from this
@@ -527,6 +549,31 @@ func (r *cloudAllocator) updateCIDRsAllocation(ctx context.Context, nodeName str
 	return err
 }
 
+// defaultNodeMaxPods is the kubelet default value of --max-pods. It is used
+// when the node has not reported its pod capacity yet.
+const defaultNodeMaxPods = 110
+
+// getNodeMaxPods returns the maximum number of pods that can run on the node.
+// It prefers the allocatable pod capacity reported by the kubelet, falls back
+// to the total capacity, and finally to the kubelet default.
+func getNodeMaxPods(node *v1.Node) int {
+	if node != nil {
+		if pods, ok := node.Status.Allocatable[v1.ResourcePods]; ok {
+			if value, isInt := pods.AsInt64(); isInt && value > 0 {
+				return int(value)
+			}
+		}
+
+		if pods, ok := node.Status.Capacity[v1.ResourcePods]; ok {
+			if value, isInt := pods.AsInt64(); isInt && value > 0 {
+				return int(value)
+			}
+		}
+	}
+
+	return defaultNodeMaxPods
+}
+
 // defineNodeGlobalCIDRs returns the global CIDR for the node.
 func (r *cloudAllocator) defineNodeGlobalCIDRs(ctx context.Context, node *v1.Node) (string, error) {
 	if node == nil {
@@ -567,6 +614,7 @@ func (r *cloudAllocator) defineNodeGlobalCIDRs(ctx context.Context, node *v1.Nod
 		}
 	}
 
+	// Get all public IPv6 CIDRs from the linux node.
 	_, cidrs := talosclient.NodeCIDRDiscovery(ipv6, ifaces)
 	logger.V(4).Info("Node has IPv6 CIDRs", "node", klog.KObj(node), "CIDRs", cidrs)
 
@@ -586,10 +634,16 @@ func (r *cloudAllocator) defineNodeGlobalCIDRs(ctx context.Context, node *v1.Nod
 
 			for _, subnet := range subnets {
 				if ip, ok := netip.AddrFromSlice(subnet.IP); ok && k.Contains(ip) {
+					if err := r.occupyNodeIPs(ipv6); err != nil {
+						return "", fmt.Errorf("error to occupy node IPs in CIDRSet %s: %v", k.String(), err)
+					}
+
 					return k.String(), nil
 				}
 			}
 		}
+
+		maxPods := getNodeMaxPods(node)
 
 		for _, cidr := range cidrs {
 			mask := netip.MustParsePrefix(cidr).Bits()
@@ -597,12 +651,16 @@ func (r *cloudAllocator) defineNodeGlobalCIDRs(ctx context.Context, node *v1.Nod
 				continue
 			}
 
-			logger.V(4).Info("Add IPv6 to CIDRSet", "node", klog.KObj(node), "CIDR", cidr)
+			logger.V(4).Info("Add IPv6 to CIDRSet", "node", klog.KObj(node), "CIDR", cidr, "maxPods", maxPods)
 
-			err := r.addCIDRSet(cidr)
+			err := r.addCIDRSet(cidr, maxPods)
 			if err != nil {
 				return "", fmt.Errorf("error to add CIDRv6 to CIDRSet: %v", err)
 			}
+		}
+
+		if err := r.occupyNodeIPs(ipv6); err != nil {
+			return "", fmt.Errorf("error to occupy node IPs in CIDRSet: %v", err)
 		}
 
 		return cidrs[0], nil
@@ -612,7 +670,9 @@ func (r *cloudAllocator) defineNodeGlobalCIDRs(ctx context.Context, node *v1.Nod
 }
 
 // addCIDRSet adds a new CIDRSet-v6 to the allocator's tracked CIDR sets.
-func (r *cloudAllocator) addCIDRSet(cidr string) error {
+// It returns an error if the resulting pod subnet is too small to accommodate
+// maxPods pods on the node.
+func (r *cloudAllocator) addCIDRSet(cidr string, maxPods int) error {
 	subnet, err := netip.ParsePrefix(cidr)
 	if err != nil {
 		return err
@@ -622,21 +682,22 @@ func (r *cloudAllocator) addCIDRSet(cidr string) error {
 
 	switch {
 	case mask < 64:
+		mask = 80
 		subnet, err = subnet.Addr().Prefix(64)
 		if err != nil {
 			return err
 		}
-
-		mask = 80
-	case mask > 123:
+	case mask > 123: // <16 ips
 		return fmt.Errorf("CIDRv6 is too small: %v", subnet.String())
-	case mask > 119:
-		// Use /120 mask or less as is, only one node can be assigned
-		break
-	case mask > 118:
-		// Use /120 mask, only two nodes can be assigned
+	case mask > 117: // <1024 ips
 		mask += 1
-	case mask > 111:
+
+		addresses := (uint64(1) << (128 - mask)) - 2
+		if uint64(maxPods) > addresses {
+			return fmt.Errorf("CIDRv6 %s is too small: pod subnet /%d provides only %d addresses for %d pods", subnet.String(), mask, addresses, maxPods)
+		}
+
+	case mask > 111: // <65k ips
 		mask += 2
 	case mask > 105:
 		mask += 4

@@ -30,6 +30,7 @@ func TestAddCIDRSet(t *testing.T) {
 	for _, tt := range []struct {
 		name                string
 		cidr                string
+		maxPods             int
 		expectedError       error
 		expectedSize        int
 		expectedClusterCIDR netip.Prefix
@@ -37,78 +38,105 @@ func TestAddCIDRSet(t *testing.T) {
 		{
 			name:                "CIDRv6 with mask size 56",
 			cidr:                "2000::1111:aaaa:bbbb:cccc:123/56",
+			maxPods:             110,
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000:0:0:1111::/64"),
 		},
 		{
 			name:                "CIDRv6 with mask size 64",
 			cidr:                "2000::aaaa:bbbb:cccc:123/64",
+			maxPods:             110,
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000::/64"),
 		},
 		{
 			name:                "CIDRv6 with mask size 80",
 			cidr:                "2000::aaaa:bbbb:cccc:123/80",
+			maxPods:             110,
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:0:0:0/80"),
 		},
 		{
 			name:                "CIDRv6 with mask size 96",
 			cidr:                "2000::aaaa:bbbb:cccc:123/96",
+			maxPods:             110,
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:0:0/96"),
 		},
 		{
 			name:                "CIDRv6 with mask size 100",
 			cidr:                "2000::aaaa:bbbb:cccc:123/100",
+			maxPods:             110,
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:c000:0/100"),
 		},
 		{
 			name:                "CIDRv6 with mask size 106",
 			cidr:                "2000::aaaa:bbbb:cccc:123/106",
+			maxPods:             110,
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:ccc0:0/106"),
 		},
 		{
 			name:                "CIDRv6 with mask size 110",
 			cidr:                "2000::aaaa:bbbb:cccc:123/110",
+			maxPods:             110,
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:cccc:0/110"),
 		},
 		{
 			name:                "CIDRv6 with mask size 112",
 			cidr:                "2000::aaaa:bbbb:cccc:123/112",
+			maxPods:             110,
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:cccc:0/112"),
 		},
 		{
 			name:                "CIDRv6 with mask size 119",
 			cidr:                "2000::aaaa:bbbb:cccc:123/119",
+			maxPods:             110,
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:cccc:0/119"),
 		},
 		{
-			name:                "CIDRv6 with mask size 120, 256 pods",
+			name:                "CIDRv6 with mask size 120 (256 addresses), 110 pods",
 			cidr:                "2000::aaaa:bbbb:cccc:123/120",
+			maxPods:             110,
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:cccc:100/120"),
 		},
 		{
-			name:                "CIDRv6 with mask size 122, 64 pods",
+			name:          "CIDRv6 with mask size 120 (256 addresses), not enough addresses for pods",
+			cidr:          "2000::aaaa:bbbb:cccc:123/120",
+			maxPods:       129,
+			expectedError: fmt.Errorf("CIDRv6 2000::aaaa:bbbb:cccc:123/120 is too small: pod subnet /121 provides only 126 addresses for 129 pods"),
+		},
+		{
+			name:                "CIDRv6 with mask size 122 (64 addresses), 30 pods",
 			cidr:                "2000::aaaa:bbbb:cccc:123/122",
+			maxPods:             30,
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:cccc:100/122"),
 		},
 		{
-			name:                "CIDRv6 with mask size 123, 32 pods",
+			name:          "CIDRv6 with mask size 122 (64 addresses), not enough addresses for 33 pods",
+			cidr:          "2000::aaaa:bbbb:cccc:123/122",
+			maxPods:       33,
+			expectedSize:  1,
+			expectedError: fmt.Errorf("CIDRv6 2000::aaaa:bbbb:cccc:123/122 is too small: pod subnet /123 provides only 30 addresses for 33 pods"),
+		},
+		{
+			name:                "CIDRv6 with mask size 123 (32 addresses), 10 pods",
 			cidr:                "2000::aaaa:bbbb:cccc:123/123",
+			maxPods:             10,
 			expectedSize:        1,
 			expectedClusterCIDR: netip.MustParsePrefix("2000::aaaa:bbbb:cccc:120/123"),
 		},
 		{
-			name:          "CIDRv6 with mask size 124",
+			name:          "CIDRv6 with mask size 124 (16 addresses)",
 			cidr:          "2000::aaaa:bbbb:cccc:123/124",
+			maxPods:       110,
+			expectedSize:  1,
 			expectedError: fmt.Errorf("CIDRv6 is too small: 2000::aaaa:bbbb:cccc:123/124"),
 		},
 	} {
@@ -117,7 +145,7 @@ func TestAddCIDRSet(t *testing.T) {
 			allocator := cloudAllocator{
 				cidrSets: cidrSets,
 			}
-			err := allocator.addCIDRSet(tt.cidr)
+			err := allocator.addCIDRSet(tt.cidr, tt.maxPods)
 
 			if tt.expectedError != nil {
 				assert.Error(t, err)
