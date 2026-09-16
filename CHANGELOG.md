@@ -1,4 +1,20 @@
 
+<a name="v1.14.0"></a>
+## [v1.14.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.13.0...v1.14.0) (2026-09-16)
+
+Welcome to the v1.14.0 release of Talos CCM!
+
+### Features
+- enhance csr checks
+
+### Changelog
+
+* 6786e25 chore: bump deps
+* 5ed539b feat: enhance csr checks
+* 0d83105 chore: add context7 configuration file
+* 24c195b fix: size ipv6 pod subnets by node max pods
+* 4dbadac chore: bump deps
+
 <a name="v1.13.0"></a>
 ## [v1.13.0](https://github.com/siderolabs/talos-cloud-controller-manager/compare/v1.12.0...v1.13.0) (2026-07-02)
 

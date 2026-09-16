@@ -5,12 +5,13 @@ kind: ServiceAccount
 metadata:
   name: talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.5.5
+    helm.sh/chart: talos-cloud-controller-manager-0.5.8
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v1.13.0"
+    app.kubernetes.io/version: "v1.14.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
+
 ---
 # Source: talos-cloud-controller-manager/templates/serviceaccount.yaml
 apiVersion: talos.dev/v1alpha1
@@ -18,15 +19,16 @@ kind: ServiceAccount
 metadata:
   name: talos-cloud-controller-manager-talos-secrets
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.5.5
+    helm.sh/chart: talos-cloud-controller-manager-0.5.8
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v1.13.0"
+    app.kubernetes.io/version: "v1.14.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 spec:
   roles:
     - os:reader
+
 ---
 # Source: talos-cloud-controller-manager/templates/configmap.yaml
 apiVersion: v1
@@ -34,15 +36,16 @@ kind: ConfigMap
 metadata:
   name: talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.5.5
+    helm.sh/chart: talos-cloud-controller-manager-0.5.8
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v1.13.0"
+    app.kubernetes.io/version: "v1.14.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 data:
   ccm-config.yaml: |
     global:
+
 ---
 # Source: talos-cloud-controller-manager/templates/role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -50,10 +53,10 @@ kind: ClusterRole
 metadata:
   name: system:talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.5.5
+    helm.sh/chart: talos-cloud-controller-manager-0.5.8
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v1.13.0"
+    app.kubernetes.io/version: "v1.14.0"
     app.kubernetes.io/managed-by: Helm
 rules:
 - apiGroups:
@@ -122,6 +125,7 @@ rules:
   - kubernetes.io/kubelet-serving
   verbs:
   - approve
+
 ---
 # Source: talos-cloud-controller-manager/templates/rolebinding.yaml
 kind: ClusterRoleBinding
@@ -136,6 +140,7 @@ subjects:
 - kind: ServiceAccount
   name: talos-cloud-controller-manager
   namespace: kube-system
+
 ---
 # Source: talos-cloud-controller-manager/templates/rolebinding.yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -151,6 +156,7 @@ subjects:
   - kind: ServiceAccount
     name: talos-cloud-controller-manager
     namespace: kube-system
+
 ---
 # Source: talos-cloud-controller-manager/templates/service.yaml
 apiVersion: v1
@@ -158,10 +164,10 @@ kind: Service
 metadata:
   name: talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.5.5
+    helm.sh/chart: talos-cloud-controller-manager-0.5.8
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v1.13.0"
+    app.kubernetes.io/version: "v1.14.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 spec:
@@ -175,6 +181,7 @@ spec:
   selector:
         app.kubernetes.io/name: talos-cloud-controller-manager
         app.kubernetes.io/instance: talos-cloud-controller-manager
+
 ---
 # Source: talos-cloud-controller-manager/templates/deployment.yaml
 apiVersion: apps/v1
@@ -182,10 +189,10 @@ kind: Deployment
 metadata:
   name: talos-cloud-controller-manager
   labels:
-    helm.sh/chart: talos-cloud-controller-manager-0.5.5
+    helm.sh/chart: talos-cloud-controller-manager-0.5.8
     app.kubernetes.io/name: talos-cloud-controller-manager
     app.kubernetes.io/instance: talos-cloud-controller-manager
-    app.kubernetes.io/version: "v1.13.0"
+    app.kubernetes.io/version: "v1.14.0"
     app.kubernetes.io/managed-by: Helm
   namespace: kube-system
 spec:
@@ -199,7 +206,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: 6aba55b0d907dab28e5e30a1d7d75eaf6763ed06d3168ec99b19769a2356598a
+        checksum/config: e8d03834115fe3478ad51b1d5cfe07e793431865fc31884f1a3d54113d7456dd
       labels:
         app.kubernetes.io/name: talos-cloud-controller-manager
         app.kubernetes.io/instance: talos-cloud-controller-manager
