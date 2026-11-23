@@ -26,7 +26,7 @@ jobs:
           echo "TAG=v${GITHUB_HEAD_REF:8}" >> "$GITHUB_ENV"
 
       - name: Install Helm
-        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        uses: azure/setup-helm@2f5e7bc67f1f9972ab16657bb795f36d8f04de0e # v5.1.0
       - name: Install helm docs
         uses: gabe565/setup-helm-docs-action@d5c35bdc9133cfbea3b671acadf50a29029e87c2 # v1.0.4
 
